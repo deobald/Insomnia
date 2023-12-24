@@ -1,0 +1,746 @@
+
+Option Explicit    'Forces the declaration of variables
+
+'[TEMPORARY VARIABLES]
+
+'[Sprite and background declarations]
+Dim Char As tSprite   'declare the Char as user defined sprite
+Dim PicWork As tArea   'PicWork is a mem (invisible)
+Dim PicSprite As tArea
+Dim PicMask As tArea
+Dim PicOrgBack As tArea
+Dim picTile As tArea 'Tile Hdc
+
+'[Tile, map, and movement declarations]
+Const TileSize = 32      'size of each sprite/map tile
+Const MoveSize = (TileSize / 4) 'The ammount of movement in pixels
+Const ScreenWidth = 320
+Const ScreenHeight = 320
+
+Dim KeyBusy As Boolean
+Dim RightIsSolid As Boolean
+Dim LeftIsSolid As Boolean
+Dim UpIsSolid As Boolean
+Dim DownIsSolid As Boolean
+
+Dim MapOffSetX As Integer
+Dim MapOffSetY As Integer
+Dim MapWidth As Long 'The width of the map, which the mapfile will set
+Dim MapHeight As Long 'The height of the map, which the mapfile will set
+Dim MapHolder(1 To 41, 1 To 41) As Record 'The Variable for maps is a user-defined record
+Dim MapFile As String
+
+'[Locations of files]
+Dim Path As String      'Location of the .EXE on the HD
+Dim PathDLL As String   'Locations of the .DLL files
+Dim PathMap As String   'Location of .MAP files
+Dim PathMusic As String 'Location of .MID files
+Dim PathSound As String 'Locations of .WAV files
+'
+'***BitBlT Function Reference***
+' Retcode = BitBlt(Destination,
+' X-coord of destination, Y-coord of destination,
+' Width, Height, Source of image,
+' X-coord of the source, Y-coord of the source,
+' Raster Operation)
+'
+' Src is the source for the bitmap
+' Hdc is the destination for the bitmap
+'
+
+'[INTIALIZE ALL GAME DATA]
+
+Private Sub Initializations()
+Dim Dummy As Long
+
+'[Set paths to game location on Hard Disk]
+Path = App.Path
+If (Right(Path, 1) <> "\") Then
+    Path = Path & "\"
+End If
+PathDLL = Path + "DLLs\"
+PathMap = Path + "Maps\"
+PathMusic = Path + "Music\"
+PathSound = Path + "SFX\"
+'[End of Set Paths]
+
+'[Form Initializations]
+Me.ScaleMode = 3 'Use pixels
+Me.KeyPreview = True  'Look for keystrokes
+Picback.Picture = LoadPicture(Path & "main.ico")
+'Load the icon to main view (nessisary - .Icon won't recognize filenames)
+Me.Icon = Picback.Picture 'Take the icon off of the background
+frmCredits.Icon = Picback.Picture 'Get icon from background
+Picback.Cls 'Clear the background for other images.
+
+'[Background PictureBox Settings]
+Picback.ScaleMode = 3
+Picback.ScaleWidth = ScreenWidth
+Picback.ScaleHeight = ScreenHeight
+
+'[Load a bitmap to set needed palette]
+Picback.Picture = LoadPicture(Path & "MapInit.bmp")
+
+'[Mem Hdc to hold a Background Bitmap to cover underneath the tiles]
+PicOrgBack.hdc = 0
+PicOrgBack.Left = PicOrgBack.Top = 0
+PicOrgBack.Width = PicOrgBack.Height = 860
+PicOrgBack.hdc = CreateMemHdc(Picback.hdc, PicOrgBack.Width, PicOrgBack.Height)
+Call LoadBmpToHdc(PicOrgBack.hdc, "MapInit.bmp")
+
+'[Mem Hdc to hold maptiles]
+picTile.hdc = 0
+picTile.Left = 0
+picTile.Top = 0
+picTile.Width = 32 'Width of the memory holder
+picTile.Height = 96 'Height of the memory holder
+picTile.hdc = CreateMemHdc(Picback.hdc, TileSize, TileSize)
+Call LoadBmpToHdc(picTile.hdc, "DLLs\MapForm.dll")
+
+'[SPRITES Mem Hdc]
+PicSprite.hdc = 0
+PicSprite.Left = 0
+PicSprite.Top = 0
+PicSprite.Width = 96 'Width of the memory holder
+PicSprite.Height = 256 'Height of the memory holder
+PicSprite.hdc = CreateMemHdc(Picback.hdc, PicSprite.Width, PicSprite.Height)
+Call LoadBmpToHdc(PicSprite.hdc, "DLLs\sprite.dll")
+
+'[MASKS - Mem Hdc]
+PicMask.hdc = 0
+PicMask.Left = 0
+PicMask.Top = 0
+PicMask.Width = 96 'Width of the mask memory holder
+PicMask.Height = 256 'Height of the mask memory holder
+PicMask.hdc = CreateMemHdc(Picback.hdc, PicMask.Width, PicMask.Height)
+Call LoadBmpToHdc(PicMask.hdc, "DLLs\sprite.dll")
+
+'[Make masks out of the sprites]
+Call Mask_Make(PicMask, PicSprite)
+
+'[Mem Hdc for work area]
+PicWork.hdc = 0
+PicWork.Left = 0
+PicWork.Top = 0
+PicWork.Width = ScreenWidth
+PicWork.Height = ScreenHeight
+PicWork.hdc = CreateMemHdc(Picback.hdc, PicWork.Width, PicWork.Height)
+Dummy = SelectPalette(PicWork.hdc, Picback.Picture.hPal, False)
+Dummy = RealizePalette(PicWork.hdc)
+
+'[TEMPORARY INITS]
+MapOffSetX = 0
+MapOffSetY = 0
+
+RightIsSolid = False
+LeftIsSolid = False
+UpIsSolid = False
+DownIsSolid = False
+
+'[Unload the bitmap used to set palette]
+Picback.Cls
+
+Call MapDraw 'Tile the map
+'Call MusicPlay("SoM.Mid")
+
+End Sub
+
+'[INTIALIZE ALL MAIN CHARACTER DATA]
+
+Private Sub Char_Init()
+
+'[Begin initializing Character Sprite]
+Char.Active = True     'sprite active
+Char.Ident = 0         '0 = Charsprite can be 0,1,2
+Char.Width = TileSize         'width of sprite
+Char.Height = (TileSize * 2)  'height of sprite
+Char.Frame = 1
+Char.x = (MapOffSetX / 32) + ((ScreenWidth / 32) / 2)
+Char.y = (MapOffSetY / 32) + ((ScreenHeight / 32) / 2)
+
+Char.Sprx = 32                 'frame offset x
+'64 = 2nd frame (walking 1)
+'32 = 1st frame (standing) - measurements in pixels (horizontaly)
+'0  = 3rd frame (walking 2)
+
+Char.Spry = 128                 'frame offset y
+'Left  = 0
+'Right = 64 - measurements in pixels (verticaly)
+'Down  = 128
+'Up    = 192
+
+Char.XDir = 0   '+1 = Right | -1 = Left | 0 = Up/Down
+Char.YDir = -1  '+1 = Up    | -1 = Down | 0 = Left/Right
+
+'[Source Area of Main Character Bitmap]
+Char.src.hdc = PicSprite.hdc
+Char.src.Left = PicSprite.Left
+Char.src.Top = PicSprite.Top
+Char.src.Width = PicSprite.Width
+Char.src.Height = PicSprite.Height
+
+'[Mask Area for Main Charmask Bitmap]
+Char.mask.hdc = PicMask.hdc
+Char.mask.Left = PicMask.Left
+Char.mask.Top = PicMask.Top
+Char.mask.Width = PicMask.Width
+Char.mask.Height = PicMask.Height
+
+'[Default background - ususally a work or save area to paint to]
+Char.bkg.hdc = PicWork.hdc
+Char.bkg.Left = PicWork.Left
+Char.bkg.Top = PicWork.Top
+Char.bkg.Width = PicWork.Width
+Char.bkg.Height = PicWork.Height
+
+End Sub
+
+'[LOOP FOR CAUSING DELAYS IN PROGY]
+
+Private Sub DelayLoop(Num As Long)
+
+'Code that repeats for the number of times (Num)
+'that you tell it to, causing a delay
+Dim i As Long
+For i = 0 To Num
+Next i
+End Sub
+
+Private Sub Mask_Make(dest As tArea, src As tArea)
+'subroutine for making masks out of a picturebox bitmap
+'dest = object where the mask will go
+'src = object where the sprite bitmap is in
+'!!Warning!! make sure all forms and objects have pixel as their scalemode
+
+'Declarations
+Dim x As Integer    'x pixel pos
+Dim y As Integer    'y pixel pos
+Dim color As Long   'current color of pixel
+Dim Dummy As Long  'dummy return code needed for blit
+Dim transparentcolor As Long  'color to be transparent
+Dim FG As Long      'foreground mask color
+Dim BG As Long         'background mask color
+
+'foreground and backgroung settings
+FG = WHITE               'foreground is white
+BG = BLACK               'background is black
+transparentcolor = BG    'What color is xparent
+
+'construct the mask pixel by pixel
+'This changes the sprite's pixels into your BG color,
+'and it changes the X-parent color into the FG clr
+'(Hence, the mask, or opposite)
+For y = 0 To src.Height - 1    'do until max y
+    For x = 0 To src.Width - 1    'do until max x
+        color = GetPixel(src.hdc, x, y)  'what color is that pixel
+        If color = transparentcolor Then  'if it is x-parent then set it to foreground
+            Dummy = SetPixel(dest.hdc, x, y, FG)
+        Else
+            Dummy = SetPixel(dest.hdc, x, y, BG) 'if not set it to background
+        End If
+    Next x
+Next y
+End Sub
+
+Private Sub Board_Refresh()
+Dim Dummy As Long 'dummy variable needed for blit
+
+'Update the working (invisible) background by copying the appropriate area
+'from the full map.
+Dummy = BitBlt(PicWork.hdc, 0, 0, PicWork.Width, PicWork.Height, PicOrgBack.hdc, MapOffSetX + (Char.Width / 2), MapOffSetY + (Char.Height / 2), SRCCOPY)
+Call PaintSprite(Char)
+
+'Update the main viewport by copying whatever has
+'been changed in the work area
+Dummy = BitBlt(Picback.hdc, 0, 0, ScreenWidth, ScreenHeight, PicWork.hdc, 0, 0, SRCCOPY)
+
+End Sub
+
+Private Sub PaintSprite(Sprite As tSprite)
+Dim Dummy As Long
+
+'Update the sprite with whatever it has changed
+'to in the work area
+Dummy = BitBlt(Sprite.bkg.hdc, (ScreenWidth / 2) - (Char.Width / 2), (ScreenHeight / 2) - (Char.Height / 2), Sprite.Width, Sprite.Height, Sprite.mask.hdc, Sprite.Sprx, Sprite.Spry, SRCAND)
+Dummy = BitBlt(Sprite.bkg.hdc, (ScreenWidth / 2) - (Char.Width / 2), (ScreenHeight / 2) - (Char.Height / 2), Sprite.Width, Sprite.Height, Sprite.src.hdc, Sprite.Sprx, Sprite.Spry, SRCINVERT)
+
+End Sub
+
+'[CREATE MAP] - CODE INCOMPLETE
+
+Private Sub MapDraw()
+
+Dim Dummy As Long
+Dim Tile As Integer
+Dim x As Integer, y As Integer
+Dim TileX As Integer, TileY As Integer
+
+Dim TileHeight As Integer, TileWidth As Integer
+Dim RecordNum As Integer
+'Dim Vertical As Long
+
+MapFile = PathMap & "wall.map" 'File to open
+
+Close #1
+Open MapFile For Random As #1 Len = Len(MapHolder(41, 41))
+'Open up the map file into MapRecord
+
+MapHeight = 640 'MapRecord.MapSize
+MapWidth = 640 'MapRecord.MapSize
+TileX = 0
+TileY = 0
+x = 1
+y = 1
+
+For y = 1 To 20 Step 1 'MapHolder(1, 1).MapSize
+
+    TileX = 0
+    
+    For x = 1 To 20 Step 1 'MapHolder(1, 1).MapSize
+       
+        RecordNum = (x * (MaxCoord + 1)) + y
+        
+        Get #1, RecordNum, MapHolder(x, y) 'Get the data from MapRecord
+        
+        Select Case MapHolder(x, y).Tile 'Tile to paint with
+        
+        Case 1:
+        Dummy = BitBlt(PicOrgBack.hdc, TileX, TileY, 32, 32, picTile.hdc, 0, 0, SRCCOPY)
+        Case 2:
+        Dummy = BitBlt(PicOrgBack.hdc, TileX, TileY, 32, 32, picTile.hdc, 0, 32, SRCCOPY)
+        Case 3:
+        Dummy = BitBlt(PicOrgBack.hdc, TileX, TileY, 32, 32, picTile.hdc, 0, 64, SRCCOPY)
+        Case Else:
+        Dummy = BitBlt(PicOrgBack.hdc, TileX, TileY, 32, 32, picTile.hdc, 0, 0, SRCCOPY)
+        
+        End Select
+                
+        TileX = TileX + 32
+        
+    Next x
+    
+    TileY = TileY + 32
+    
+Next y
+
+End Sub
+Private Sub GameLoop()
+
+'Put repeating code here for Server checks.
+
+End Sub
+
+Private Sub MoveLeft()
+Dim AniLoop As Integer
+
+Char.XDir = -1
+Char.YDir = 0
+Char.Spry = 0 'Face Left
+
+Call CheckLeft
+
+If LeftIsSolid = False And MapOffSetX >= -((ScreenWidth / 2) - (Char.Width)) Then
+
+    '[ANIMATION SEQUENCE]
+    KeyBusy = True
+    
+    For AniLoop = 0 To 3 Step 1 'Repeat animation 4 times
+    Select Case Char.Frame
+        
+        Case 1
+            Char.Frame = 2
+            Char.Sprx = 64
+        Case 2
+            Char.Frame = 3
+            Char.Sprx = 32
+        Case 3
+            Char.Frame = 4
+            Char.Sprx = 0
+        Case 4
+            Char.Frame = 1
+            Char.Sprx = 32
+                
+    End Select
+        
+    MapOffSetX = MapOffSetX - MoveSize
+    Char.x = (MapOffSetX / 32) + ((ScreenWidth / 32) / 2)
+    Call FuncTimeOut(0.2)
+    Next AniLoop
+    
+    KeyBusy = False
+        
+Else
+
+    Select Case Char.Frame
+        
+        Case 1
+            Char.Frame = 2
+            Char.Sprx = 64
+        Case 2
+            Char.Frame = 3
+            Char.Sprx = 32
+        Case 3
+            Char.Frame = 4
+            Char.Sprx = 0
+        Case 4
+            Char.Frame = 1
+            Char.Sprx = 32
+            
+    End Select
+
+    MapOffSetX = MapOffSetX
+    Char.x = Char.x
+    Call FuncTimeOut(0.2)
+        
+End If
+
+Char.Sprx = 32
+
+End Sub
+
+Private Sub MoveRight()
+Dim AnimLoop As Integer
+
+Char.XDir = 1
+Char.YDir = 0
+Char.Spry = 64     'Face Right
+
+Call CheckRight
+
+If RightIsSolid = False And MapOffSetX <= ((MapWidth / 2) + (ScreenWidth / 2) - (Char.Width * 2)) Then
+
+    '[ANIMATION SEQUENCE]
+    KeyBusy = True
+    
+    For AnimLoop = 0 To 3 Step 1 'Loop animation 4 times
+    Select Case Char.Frame
+        
+        Case 1
+            Char.Frame = 2
+            Char.Sprx = 64
+        Case 2
+            Char.Frame = 3
+            Char.Sprx = 32
+        Case 3
+            Char.Frame = 4
+            Char.Sprx = 0
+        Case 4
+            Char.Frame = 1
+            Char.Sprx = 32
+            
+    End Select
+        
+    MapOffSetX = MapOffSetX + MoveSize
+    Char.x = (MapOffSetX / 32) + ((ScreenWidth / 32) / 2)
+    Call FuncTimeOut(0.2)
+    Next AnimLoop
+    
+    KeyBusy = False
+    
+Else
+
+    Select Case Char.Frame
+        
+        Case 1
+            Char.Frame = 2
+            Char.Sprx = 64
+        Case 2
+            Char.Frame = 3
+            Char.Sprx = 32
+        Case 3
+            Char.Frame = 4
+            Char.Sprx = 0
+        Case 4
+            Char.Frame = 1
+            Char.Sprx = 32
+            
+    End Select
+        
+    MapOffSetX = MapOffSetX
+    Call FuncTimeOut(0.2)
+        
+End If
+
+End Sub
+
+Private Sub MoveUp()
+Dim AnimLoop As Integer
+
+Char.XDir = 0
+Char.YDir = -1
+Char.Spry = 192    'Face Up
+Call CheckUp
+
+If UpIsSolid = False And MapOffSetY >= -((ScreenHeight / 2) - (Char.Height)) Then
+
+    '[ANIMATION SEQUENCE]
+    KeyBusy = True
+    
+    For AnimLoop = 0 To 3 Step 1 'Loop animation 4 times
+    Select Case Char.Frame
+        
+        Case 1
+            Char.Frame = 2
+            Char.Sprx = 64
+        Case 2
+            Char.Frame = 3
+            Char.Sprx = 32
+        Case 3
+            Char.Frame = 4
+            Char.Sprx = 0
+        Case 4
+            Char.Frame = 1
+            Char.Sprx = 32
+            
+    End Select
+        
+    MapOffSetY = MapOffSetY - MoveSize
+    Char.y = (MapOffSetY / 32) + ((ScreenHeight / 32) / 2)
+    Call FuncTimeOut(0.2)
+    Next AnimLoop
+    
+    KeyBusy = False
+    
+Else
+
+    Select Case Char.Frame
+        
+        Case 1
+            Char.Frame = 2
+            Char.Sprx = 64
+        Case 2
+            Char.Frame = 3
+            Char.Sprx = 32
+        Case 3
+            Char.Frame = 4
+            Char.Sprx = 0
+        Case 4
+            Char.Frame = 1
+            Char.Sprx = 32
+            
+    End Select
+        
+    MapOffSetY = MapOffSetY
+    Call FuncTimeOut(0.2)
+    
+End If
+
+End Sub
+
+Private Sub MoveDown()
+Dim AnimLoop As Integer
+
+Char.XDir = 0
+Char.YDir = 1
+Char.Spry = 128    'Face Down
+Call CheckDown
+
+If DownIsSolid = False And MapOffSetY <= ((MapHeight / 2) - (Char.Height * 1.5)) Then
+
+    '[ANIMATION SEQUENCE]
+    KeyBusy = True
+        
+    For AnimLoop = 0 To 3 Step 1 'Loop animation 4 times
+    Select Case Char.Frame
+        
+        Case 1
+            Char.Frame = 2
+            Char.Sprx = 64
+        Case 2
+            Char.Frame = 3
+            Char.Sprx = 32
+        Case 3
+            Char.Frame = 4
+            Char.Sprx = 0
+        Case 4
+            Char.Frame = 1
+            Char.Sprx = 32
+            
+    End Select
+        
+    MapOffSetY = MapOffSetY + MoveSize
+    Char.y = (MapOffSetY / 32) + ((ScreenHeight / 32) / 2)
+    Call FuncTimeOut(0.2)
+    Next AnimLoop
+    
+    KeyBusy = False
+    
+Else
+
+    Select Case Char.Frame
+        
+        Case 1
+            Char.Frame = 2
+            Char.Sprx = 64
+        Case 2
+            Char.Frame = 3
+            Char.Sprx = 32
+        Case 3
+            Char.Frame = 4
+            Char.Sprx = 0
+        Case 4
+            Char.Frame = 1
+            Char.Sprx = 32
+            
+    End Select
+        
+    MapOffSetY = MapOffSetY
+    Call FuncTimeOut(0.2)
+    
+End If
+
+End Sub
+
+Private Sub CheckLeft()
+
+    If Char.x = 0 Then: Exit Sub
+    
+    If MapHolder(Char.x, Char.y + 2).IsWall = True Then
+    'MapHolder((MapOffSetX / 32) + (((ScreenWidth / 32) / 2) - ((Char.Width / 32) / 2)) + 1, (MapOffSetY / 32) + (((ScreenHeight / 32) / 2) - ((Char.Height / 32) / 2)) + 3).IsWall = True Then
+    LeftIsSolid = True
+    Else: LeftIsSolid = False
+    End If
+    
+    txtInfo.Text = Char.x
+
+End Sub
+
+Private Sub CheckRight()
+
+    If Char.y = ScreenWidth - Char.Width Then: Exit Sub
+
+    If MapHolder(Char.x + 2, Char.y + 2).IsWall = True Then
+    'MapHolder((MapOffSetX / 32) + (((ScreenWidth / 32) / 2) - ((Char.Width / 32) / 2)) + 2, (MapOffSetY / 32) + (((ScreenHeight / 32) / 2) - ((Char.Height / 32) / 2)) + 3).IsWall = True Then
+    RightIsSolid = True
+    Else: RightIsSolid = False
+    End If
+
+End Sub
+
+
+Private Sub CheckUp()
+
+    If Char.y = 0 Then: Exit Sub
+
+    If MapHolder(Char.x + 1, Char.y + 1).IsWall = True Then
+    'MapHolder((MapOffSetX / 32) + (((ScreenWidth / 32) / 2) + ((Char.Width / 32) / 2)), (MapOffSetY / 32) + (((ScreenHeight / 32) / 2) - ((Char.Height / 32) / 2)) + 2).IsWall = True Then
+    UpIsSolid = True
+    Else: UpIsSolid = False
+    End If
+
+End Sub
+
+Private Sub CheckDown()
+
+    If Char.y = ScreenHeight - Char.Width Then: Exit Sub
+
+    If MapHolder(Char.x + 1, Char.y + 3).IsWall = True Then
+    'MapHolder((MapOffSetX / 32) + (((ScreenWidth / 32) / 2) + ((Char.Width / 32) / 2)), (MapOffSetY / 32) + (((ScreenHeight / 32) / 2) + ((Char.Height / 32) / 2)) + 2).IsWall = True Then
+    DownIsSolid = True
+    Else: DownIsSolid = False
+    End If
+
+End Sub
+
+
+'[WHEN A USER HOLDS DOWN A BUTTON]
+
+Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
+
+If KeyBusy = True Then: Exit Sub
+
+Select Case KeyCode
+   
+    Case KEY_LEFT:
+        Call MoveLeft
+    Case KEY_RIGHT:
+        Call MoveRight
+    Case KEY_UP:
+        Call MoveUp
+    Case KEY_DOWN:
+        Call MoveDown
+       
+End Select
+
+End Sub
+
+Private Sub Form_KeyUp(KeyCode As Integer, Shift As Integer)
+
+Char.Sprx = 32
+
+End Sub
+
+Private Sub MusicPlay(File As String)
+Dim Filename As String
+
+'Song = "\ins.mid"
+Filename = PathMusic & File
+MMControl1.Filename = Filename
+MMControl1.Wait = True
+
+If Not MMControl1.Mode = mciModeNotOpen Then
+    MMControl1.Command = "Close"
+End If
+
+MMControl1.DeviceType = "Sequencer"
+MMControl1.Command = "Open"
+MMControl1.Command = "Play"
+
+End Sub
+
+Private Sub MMControl1_Done(NotifyCode As Integer)
+
+If NotifyCode = 1 Then 'If finish was successful
+MMControl1.Command = "Close" 'Close old control
+MMControl1.Command = "Open" 'Reopen
+MMControl1.Command = "Prev"
+MMControl1.Command = "Play"
+End If
+End Sub
+
+Private Sub mnuCopyR_Click()
+
+MsgBox "Any copying or disasebling of data files, executables, graphics, or any other files installed with this program is an infringement of CopyRight law, and will result in criminal prosecution. Copyright © Square Route Software 1997, All Right Reserved.", vbInformation, "Copyright Information"
+
+End Sub
+
+Private Sub mnuCredits_Click()
+frmCredits.Show
+End Sub
+
+Private Sub mnuExit_Click()
+Unload frmCredits
+Unload frmMain
+End Sub
+
+Private Sub Form_Load()
+
+'[CALLING SUBROUTINES]
+
+Call Initializations 'initialize all game data
+Call Char_Init 'Initialize all of the Character Data
+
+Timer1.Enabled = True  'Start Timer
+
+End Sub
+Private Sub Form_Unload(Cancel As Integer)
+
+'Clear all Memory DCs outta memory
+'Works for all methods of exiting the app
+Call DestroyHdcs
+
+If Not MMControl1.Mode = mciModeNotOpen Then
+    MMControl1.Command = "Close"
+End If
+
+End Sub
+
+Private Sub Timer1_Timer()
+
+'txtInfo.Text = Int((Char.Mapy + ScreenHeight) / TileSize) + 3
+Call Board_Refresh  'Update the background and clean
+                    'sprites off the save area
+
+'Loop back and repeat whatever is in this Subroutine continuously
+End Sub
+

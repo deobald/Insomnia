@@ -1,0 +1,186 @@
+
+ALT+174: «
+ALT+175: »
+ALT+153: Ö
+ALT+167: º
+ALT+157: ¥
+ALT+21 : §
+
+
+--------------------------------------------
+
+Do
+
+  Dim Command as string
+
+  Command = Mid$(Data, InStr(String, LineString = Mid$(Command, InStr(Command, " ") + 1)
+  Command = Left$(Command, instr(Command, " ") - 1)
+
+Loop Until InStr(Data, "«") = False
+
+--------------------------------------------
+
+Dim LineString as string
+Dim DataString as string
+Dim CommandString as string
+
+WinSock(Index).GetData DataString
+
+While instr(DataString, "«")
+
+	CommandString = Left$(DataString, InStr(DataString, " ") - 1)
+	LineString = Mid$(DataString, InStr(DataString, " ") + 1)
+
+	'CHECK COMMANDS AND DATA
+
+	DataString = Mid$(DataString, InStr(Mid$(DataString, 2), "«"))
+
+WEnd
+
+--------------------------------------------
+
+WinSock_RecieveData(Index As Integer)
+
+Static DataRead as string
+Dim LineString as string
+Dim CommandString as string
+
+Socket.GetData to DataRead
+
+While InStr(DataRead, "!") [= True] 'If there's still the EOF left in DataRead
+
+    CommandString = Left$(DataRead, InStr(DataRead, " ") - 1)
+    'InStr(DataRead, " ") - Find a space in DataRead
+    'Left$(DataRead, ABOVE - 1) - CommandString = All the the left of the space
+
+    LineString = Mid$(DataRead, InStr(DataRead, " ") + 1)
+    'InStr(DataRead, " ") - Find a space in DataRead
+    'Mid$(DataRead, ABOVE + 1) - LineString = All the the right of the space
+
+    LineString = Left$(LineString, InStr(LineString, "!") - 1)
+    'InStr(LineString, "!") - Find a ! in LineString
+    'Left$(LineString, ABOVE - 1) - Take all to the left of the EOF
+
+    'Do checking here with command and line string.
+
+    DataRead = Mid$(DataRead, InStr(DataRead, "!") + 1)
+    'InStr(DataRead, "!") - Find EOF in DataString
+    'Mid$(DataRead, ABOVE + 1) - DataRead = To the right of EOF (nothing)
+
+WEnd
+
+End Sub
+
+--------------------------------------------
+
+[][][][][][][][][][][][][][][][][][][][][][][][]
+
+Do some char like ÿ where people can't type and don't allow them to type it.
+Do like
+instr(String, "!") + 1 tuh.
+
+Do
+loop until instr(string, "!") = false
+
+And in it..
+Dim Command as string
+Command = mid$(String, instr(String,LineString = mid$(Command, instr(Command, " ") + 1)
+Command = left$(Command, instr(Command, " ") - 1)
+That'll give linestring as the values to specify like X and Y coordinates of where player moves, and command string will be the command like !Move 100 100
+
+Or like thi
+Dim LineString as string
+Dim DataString as string
+Dim CommandString as string
+Socket.ReadData to DataString
+While instr(DataString, "!"
+CommandString = left$(DataString, instr(DataString, " ") - 1)
+LineString = mid$(DataString, instr(DataString, " ") + 1)
+
+Check commands and data.
+
+DataString = mid$(DataString, instr(mid$(DataString, 2), "!"))
+WEnd
+
+There ya go.
+That'll cut out the !Whatever.
+Give you the linestring.
+Oh, and if you want to cut out the !s after commandstring, do insteada LineString = mid$(DataString, instr(DataString, " ") + 1)
+do this:
+LineString = mid$(DataString, instr(DataString, " ") + 1)
+LineString = left$(LineString, instr(LineString, "!") - 1)
+There ya go. =)
+Then perform checking commands and doing corresponding events where I put it.
+That's how I do anyways
+Oh.
+That'll make EOFs too.
+So the socket won't halfway read data and do stuff.
+Actually.
+You might need an EOF still.
+That'll help.
+End of data.
+Should be called EOD but they call them EOFs for some strange reason.
+
+Like
+!Move X### Y###+
++ can be the end char.
+Want me to re-do a whole new code for that?
+Actually, you don't need ! if you have an EOF.
+The thing about EOFs that's so important is sometimes the sock can split u
+Like uhh.
+That just doesn't sound right to say might supposed to have to me.
+Oh well.
+It might suppose to send
+!Move 100 200
+But if the packet splits, it might do
+!Move 100 2
+And send 00 a few hundred milliseconds later.
+Which can crash unless you have error-checking code and that's a pain.
+The thing about EOFs is that you can wait until you receive
+
+Move 100 200+
+Until you actually start trying to move people.
+Of course, shouldn't use any commonly used chars like + or !.
+Use like Alt+0255.
+=)
+
+So...
+When you send data...
+Let's just say EOF is ! since I can type that faster.
+
+Whenever sending data, send Command, a space, then data, then !.
+To read it... Okay, here's a big set of codes.
+Uh, never mind.
+Socket_Read Events
+Static DataRead as string
+Dim LineString as string
+Dim CommandString as string
+Socket.ReadData to DataRead (However way you do it)
+
+While Instr(DataRead, "!")
+CommandString = left$(DataRead, instr(DataRead, " ") - 1)
+LineString = mid$(DataRead, instr(DataRead, " ") + 1)
+LineString = left$(LineString, instr(LineString, "!") - 1)
+
+Do your checking here with command and line string.
+--------------------------------------------------------
+DataRead = mid$(DataRead, instr(DataRead, "!") + 1)
+WEnd
+End Sub
+
+There ya go. =)
+NP. =)
+Done it like 200 times now, like stuck in my mind. =)
+There are times when there is packet loss.. This is the scariest thing.
+Sometimes for no reason, you send something, and it just doesn't return. =(
+I still haven't figured out how to correct this, just been trying to work around data loss.
+Usually faster servers don't get data loss though, so if you have a good server it should be very very rare if it ever happens at all.
+Mine's a 28.8 though, so kinda scary.
+Oh, I mean the ISP mainly.
+If it's a LAN, I doubt there'll be any data loss.
+56K should be pretty good. =)
+I'm not sure about VB 5 controls.
+It might be so good that they already did auto data-loss correction.
+Wow, I need to get VB 5 then. =)
+Or I mean I got it, but I need to use it.
+Maybe next game.

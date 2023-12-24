@@ -1,0 +1,95 @@
+Option Explicit
+
+'User Types
+Type PALETTEENTRY
+        peRed As Byte
+        peGreen As Byte
+        peBlue As Byte
+        peFlags As Byte
+End Type
+
+Type LOGPALETTE
+        palVersion As Integer
+        palNumEntries As Integer
+        palPalEntry(1) As PALETTEENTRY
+End Type
+
+'***************************************************************
+'Windows GDI API constants and Functions for Temp HDC
+Declare Function CreateCompatibleDC Lib "gdi32" (ByVal hdc As Long) As Long
+Declare Function CreateCompatibleBitmap Lib "gdi32" (ByVal hdc As Long, ByVal nWidth As Long, ByVal nHeight As Long) As Long
+Declare Function DeleteObject Lib "gdi32" (ByVal hObject As Long) As Long
+Declare Function DeleteDC Lib "gdi32" (ByVal hdc As Long) As Long
+Declare Function SelectObject Lib "gdi32" (ByVal hdc As Long, ByVal hObject As Long) As Long
+Declare Function CreatePalette Lib "gdi32" (lpLogPalette As LOGPALETTE) As Long
+Declare Function RealizePalette Lib "gdi32" (ByVal hdc As Long) As Long
+Declare Function SelectPalette Lib "gdi32" (ByVal hdc As Long, ByVal hPalette As Long, ByVal bForceBackground As Long) As Long
+
+'***************************************************************
+'Arrays that will hold the Hdc's
+Dim MemHdc() As Long
+Dim BitmapHdc() As Long
+Dim TrashBmpHdc() As Long
+Dim NumOfDcs As Integer
+
+Function CreateMemHdc(ScreenHdc As Long, Width As Integer, Height As Integer) As Long
+'This function will create a temporary Hdc to blit in and out of
+'ScreenHdc = the display DC that we will be compatible
+' Width = width of needed bitmap
+' Height = height of needed bitmap
+
+
+ReDim Preserve MemHdc(NumOfDcs)
+ReDim Preserve BitmapHdc(NumOfDcs)
+ReDim Preserve TrashBmpHdc(NumOfDcs)
+
+MemHdc(NumOfDcs) = CreateCompatibleDC(ScreenHdc)
+    If MemHdc(NumOfDcs) Then
+        BitmapHdc(NumOfDcs) = CreateCompatibleBitmap(ScreenHdc, Width, Height)
+        If BitmapHdc(NumOfDcs) Then
+            TrashBmpHdc(NumOfDcs) = SelectObject(MemHdc(NumOfDcs), BitmapHdc(NumOfDcs))
+            CreateMemHdc = MemHdc(NumOfDcs)
+        End If
+    End If
+NumOfDcs = NumOfDcs + 1
+End Function
+Sub DestroyHdcs()
+'*************************************************************
+'Subroutine to free all Dc's
+'*************************************************************
+Dim Dummy As Long
+Dim i As Integer
+
+For i = 0 To NumOfDcs - 1
+BitmapHdc(i) = SelectObject(MemHdc(i), TrashBmpHdc(i))
+Dummy = DeleteObject(BitmapHdc(i))
+Dummy = DeleteDC(MemHdc(i))
+Next i
+
+End Sub
+Sub LoadBmpToHdc(MHdc As Long, FileN As String)
+Dim OrgBmp As Long
+Dim Path As String
+Dim PathDLL As String
+Dim PathMap As String
+Dim PathMusic As String
+Dim PathSound As String
+
+'[Set paths to game location on Hard Disk]
+Path = App.Path
+If (Right(Path, 1) <> "\") Then
+    Path = Path & "\"
+End If
+PathDLL = Path + "DLLs\"
+PathMap = Path + "Maps\"
+PathMusic = Path + "Music\"
+PathSound = Path + "SFX\"
+'[End of Set Paths]
+
+OrgBmp = SelectObject(MHdc, LoadPicture(Path & FileN))
+
+If OrgBmp Then
+   DeleteObject (OrgBmp)
+End If
+
+End Sub

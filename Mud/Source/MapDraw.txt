@@ -1,0 +1,65 @@
+'[General Declarations]
+
+Dim MapHolder(1 To 41, 1 To 41) As Record 'The Variable for maps is a user-defined record
+
+---------------------------
+
+
+'[Below is the map drawing routine that's called in initializations]
+
+Private Sub MapDraw()
+
+Dim Dummy As Long
+Dim Tile As Integer
+Dim x As Integer, y As Integer
+Dim TileX As Integer, TileY As Integer
+
+Dim TileHeight As Integer, TileWidth As Integer
+Dim RecordNum As Integer
+'Dim Vertical As Long
+
+MapFile = PathMap & "wall.map" 'File to open
+
+Close #1
+Open MapFile For Random As #1 Len = Len(MapHolder(41, 41))
+'Open up the map file into MapRecord
+
+MapHeight = 640 'MapRecord.MapSize
+MapWidth = 640 'MapRecord.MapSize
+TileX = 0
+TileY = 0
+x = 1
+y = 1
+
+For y = 1 To 20 Step 1 'MapHolder(1, 1).MapSize
+
+    TileX = 0
+    
+    For x = 1 To 20 Step 1 'MapHolder(1, 1).MapSize
+       
+        RecordNum = (x * (MaxCoord + 1)) + y
+        
+        Get #1, RecordNum, MapHolder(x, y) 'Get the data from MapRecord
+        
+        Select Case MapHolder(x, y).Tile 'Tile to paint with
+        
+        Case 1:
+        Dummy = BitBlt(PicOrgBack.hdc, TileX, TileY, 32, 32, picTile.hdc, 0, 0, SRCCOPY)
+        Case 2:
+        Dummy = BitBlt(PicOrgBack.hdc, TileX, TileY, 32, 32, picTile.hdc, 0, 32, SRCCOPY)
+        Case 3:
+        Dummy = BitBlt(PicOrgBack.hdc, TileX, TileY, 32, 32, picTile.hdc, 0, 64, SRCCOPY)
+        Case Else:
+        Dummy = BitBlt(PicOrgBack.hdc, TileX, TileY, 32, 32, picTile.hdc, 0, 0, SRCCOPY)
+        
+        End Select
+                
+        TileX = TileX + 32
+        
+    Next x
+    
+    TileY = TileY + 32
+    
+Next y
+
+End Sub

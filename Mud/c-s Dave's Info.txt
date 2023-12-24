@@ -1,0 +1,535 @@
+--------------------------------------
+       ICQ Chat Save file     
+ Started on Fri Mar 27 23:21:42 1998
+
+--------------------------------------
+<Sabin> Hello
+<Sabin> 
+<David Ikeda> Howdy!
+<Sabin> gonna need to draw a box around each frame and then center the char on a certain point within the box for all chars
+<Sabin> 
+<Xian> Hiya Boyz!
+<Xian> 
+<David Ikeda> I'm back. =)
+<Xian> So I see. =)
+<Xian> 
+<Xian> Just a sec. Gotta send Sab a zip of wavs. =)
+<Xian> 
+<David Ikeda> Cool.
+<David Ikeda> Sabin, did you have Tahoma font? I forgot.
+<David Ikeda> 
+<Xian> 
+<Xian> test test test
+<Xian> 
+<Sabin> no I dont
+<Sabin> 
+<David Ikeda> Is that Tahoma Xian? =)
+<David Ikeda> Oh, it's the nicest font.
+<Sabin> 
+<David Ikeda> Fancy and very easy to read, yet simple and just rules.
+<David Ikeda> Verdana too.
+<David Ikeda> Test.
+<David Ikeda> I despise arila!
+<David Ikeda> al!
+<David Ikeda> Test, Verdana here.
+<Sabin> I always use Comic Sans
+<Sabin> 
+<David Ikeda> Comic Sans MS used to be my favorite until I discovered Verdana and Tahoma, those are pretty cool.
+<David Ikeda> I wish windows would automatically install fonts in ICQ that the client picks if the other side doesn't have it.
+<David Ikeda> Automatically download and install that is.
+<David Ikeda> Temporarily.
+<David Ikeda> So it clears away after you close ICQ of course, so you don't end up having 2,000,000 fonts in your windows dir.
+<Xian> 
+<Xian> Test test test...
+<Xian> 
+<David Ikeda> Xian, you gots Verdana or Tahoma?
+<Xian> Uhm, I dunno. Lemme see here... =)
+<Xian> 
+<David Ikeda> 
+<David Ikeda> Cool. =)
+<David Ikeda> )
+<Xian> Yup, both. But I like Maiandra GD.
+<Xian> 
+<Xian> It's no easy to read, and you need to bold it, but I luv it anyway. =)
+<Xian> 
+<Xian> 
+<David Ikeda> Oh, I don't have that one, I see times new roman for yours.
+<Xian> Oh. =)
+<Xian> 
+<David Ikeda> Wish fonts were better managed.
+<David Ikeda> Eww, I hate MS Serif, I must change this now. =)
+<Xian> He he... =)
+<Xian> 
+<Xian> 
+<Xian> 
+<David Ikeda> Back to Verdana.
+<Xian> Dave, do you mind if I ask you a question or two?
+<Xian> 
+<David Ikeda> Test
+<Xian> Just quick ones.
+<Xian> 
+<David Ikeda> No prob.
+<Xian> Here goes..
+<Xian> 
+<David Ikeda> 
+<David Ikeda> Feel free. =)
+<Xian> First off, how do you request movement in SSL? Or which method would you recommend?
+<Xian> 
+<Xian> 1) sending a move info to the server for every button press...
+<David Ikeda> For action, I would do just 1 byte string for what direction it is, like U for up, D for down, etc.
+<Xian> 2) Having it timed on the client to send the location of the char every so often...
+<Xian> 3) or Having the server timed to check the clients?
+<Xian> 
+<David Ikeda> Sending a move info to the server for every button press is what I do. TCP stacks up so it can pile a couple moves together so you don't spend so much bandwidth at all.
+<David Ikeda> 
+<Xian> Ah....coolness. =)
+<Xian> 
+<David Ikeda> What I do when the server receives it is to update the playerX/Y accordingly, etc.
+<David Ikeda> ex-
+<David Ikeda> 
+<David Ikeda> Case "U"
+<David Ikeda> PlayerY = PlayerY - 1
+<David Ikeda> SendToAllPlayers "U"
+<David Ikeda> 
+<David Ikeda> Then when the players receive U, they move the player up.
+<David Ikeda> Now, with animation, it gets more complex.
+<David Ikeda> Since a player could move 10 times and it could all stack up at once.
+<David Ikeda> What I do is have a script for each player...
+<David Ikeda> When he's in the middle of movement and the player receives the command to move him WHILE the player is moving anyways due to lag, it appends to this script, which is like UDULUL etc.
+<Sabin> hehe thats a freaky wav :P
+<Sabin> 
+<David Ikeda> Cool. =)
+<Xian> Heh...thanks. =)
+<Xian> 
+<David Ikeda> Now, let's say the guy's script was UUDDLLRR
+<Xian> I totally messed up my voice with this WAV editor I have. =)
+<Xian> 
+<David Ikeda> When he moves up, the script becomes mid$(script, 2)
+<David Ikeda> , so it becomes UDDLLR, then after he moves up again, DDLLRR, etc.
+<Sabin> welcome 4 is best
+<Sabin> 
+<David Ikeda> Err, in the first one, one more R at the end, typo.
+<Xian> Gotcha. =)
+<Xian> 
+<Xian> , Sab. =)
+<Xian> 
+<David Ikeda> Now in an action game where having the player's coordinates updated ASAP is crucial to accuracy of attacking and such, you may want to make it so the player skips to the last part of the script and teleports if he lags so much as to get like 10 pending moves or so.
+<David Ikeda> Or make him speed up to catch up.
+<Xian> Uh-huh...okay. =)
+<Xian> 
+<David Ikeda> 
+<David Ikeda> So basically when you move a player, send a 1-byte string to determine what direction , have server update his coordinates correspondingly, and have the server send to the rest of the clients that that guy moved in the direction, and have the clients add to a script of what he needs to do.
+<Xian> Okie dokie...
+<Xian> 
+<David Ikeda> And in the game, constantly look for player scripts to find out what to do.
+<David Ikeda> Or that's how I do it anyways.
+<Xian> So, you use a routine "SendToAllClients" to send info to all the clients but the one sending?
+<Xian> 
+<Xian> 
+<David Ikeda> Not really, I just named it that for example. =)
+<David Ikeda> 
+<Xian> Ah...good. =)
+<Xian> 
+<Xian> 
+<David Ikeda> I use a sub called SocketSend (ClientIndex, String, ClientOmit)
+<David Ikeda> 
+<David Ikeda> Now if ClientIndex is 0, it sends to all players, omitting whatever you specify in ClientOmit, if it's a non-zero value.
+<Xian> Oh...okay.
+<Xian> 
+<David Ikeda> But any way you like is fine for that.
+<David Ikeda> Actually, a sub like sendtoallclients would make it easier to understand and tell apart what you are sending to one specific sock and what you are sending to everybody...
+<David Ikeda> I dunno why I did that.
+<David Ikeda> Just to save subroutine space I guess, I hate it when I have like 50 different subs in one form and gets really hard to find stuff.
+<Xian> Yeah...ditto. =)
+<Xian> 
+<Xian> So, you'd suggest using something like:
+<Xian> 
+<Xian> SendToAllClients(ClientIndex, String)
+<Xian> 
+<Xian> > Send info to all clients but ClientIndex ('cuz he's who sent it?)
+<Xian> 
+<David Ikeda> No need for a client index if you are sending to everybody.. You might want ohh, okay. =)
+<David Ikeda> Yep.
+<David Ikeda> Maybe ClientOmit might be easier to understand, but if that's easier for you, anything that works for you is the right way. =)
+<David Ikeda> 
+<Xian> Uhm, okay. =) I'm just curious, is there any other reason that you'd use ClientOmit, other than to not send to the client from whom it originated?
+<Xian> 
+<David Ikeda> Not really, if I specify 0, it includes him.
+<David Ikeda> For example.. I have some things where the sender even gets things back, like chatting.. So that chat is in order..
+<Xian> Oh yeah, that makes sense. 'Cuz you want 'says' and stuff to go thru the server first so players can run lag tests...
+<Xian> 
+<Xian> yeah, order, too. =)
+<Xian> 
+<David Ikeda> Yeah, and it stays in order like you don't say yes and the have some ask a question next. =)
+<David Ikeda> 
+<David Ikeda> Hehe.
+<David Ikeda> 
+<David Ikeda> Also stuff like if a player was sending something to all people about another client which the other client already knew, omit the client that knew everything.
+<David Ikeda>  or whatever. =)
+<Xian> 
+<David Ikeda> 
+<Xian> Whew....I don't know if I'll get that complex yet. =)
+<Xian> 
+<David Ikeda> Yeah, usually it's good to start off, touch up things in time.
+<Sabin> hey can I interject a question real quick :P
+<Sabin> 
+<Xian> Go ahead, sab. =)
+<Xian> 
+<David Ikeda> Sure. =)
+<Sabin> actually for you Xian, can we just do char selection another way? :P
+<Sabin> 
+<Xian> Fire away.
+<Xian> 
+<David Ikeda> 
+<Sabin> cuz its gonna take me forever to align these
+<Sabin> 
+<David Ikeda> I mean sure you can ask a question, Xian must answer that one. =)
+<Xian> 
+<Xian> II suppose so. What did you have in mind?
+<Xian> 
+<Sabin> like show a pic of every char and click on the one ya want?
+<Sabin> 
+<Xian> Sure, I can do that. It might take a bit, though.
+<Xian> 
+<Sabin> hmmm
+<Sabin> 
+<Sabin> I dont want to add time to the project :P
+<Sabin> 
+<Xian> Not too long. Maybe 1/4 to 1/2 hour.
+<Xian> 
+<Xian> If it'll save you time...
+<Xian> 
+<Sabin> maybe I would need to align them anyways so they would line up on the map?
+<Sabin> 
+<Sabin> Afro
+<Sabin> 
+<Xian> Yeah, 'cuz the guy w/ a big, red afro (Affro? afrro? =P ) is really low. =)
+<Xian> 
+<Sabin> ok Ill try
+<Sabin> 
+<Xian> 
+<Xian> Test
+<Xian> 
+<David Ikeda> Ooh, Tahoma. =)
+<David Ikeda> Nice font.
+<Sabin> I made a little guide of lines that show me where everything should be
+<Sabin> 
+<Xian> Uh....Verdana. =)
+<Xian> 
+<David Ikeda> They're nice.
+<David Ikeda> I want to use them for the next game, it's just that 50% of the people I know don't have them.
+<Xian> Ah...cool. =)
+<Xian> 
+<Xian> So, do you need me to re-do the char selection then, Sab?
+<Xian> 
+<David Ikeda> 
+<David Ikeda> 
+<David Ikeda> Tahoma looks really nice with headings all caps in a bright color over white on a dark background... Like this.
+<David Ikeda> 
+<Xian> Yeah..
+<Xian> 
+<David Ikeda> 
+<David Ikeda> GAMES
+<David Ikeda> Xenith
+<Xian> 
+<Xian> He he... =)
+<Xian> 
+<Sabin> no char selection is fine if I have to align them anyways
+<Sabin> 
+<Xian> Ah, okay. =)
+<Xian> 
+<David Ikeda> Enter the lands of Xenith where blah blah blah.  Seek adventures as you blah blah blah and blah blah blah.  However, blah blah blah blah blah blah may blah blah blah.  So blah blah blah from all across the world.
+<David Ikeda> 
+<David Ikeda> Steel & Sorcery Legends
+<Xian> Thanks Sab. I'll maybe redo char selection (retouch) later so that it's easier to use.
+<Xian> 
+<David Ikeda> Seek mana orbs to complete your quest of infinite wisdom in this daring adventure.  Blah blah blah and also blah blah blah.  If only the blah blah blah mana okay blah blah.
+<David Ikeda> 
+<Xian> 
+<Xian> Font Test
+<Xian> 
+<David Ikeda> Hehe, that's how my homepage-in-progress's layout looks like, with verdana.
+<Xian> Ahh....I wuz kinda wondering what you were doing. =)
+<Xian> 
+<David Ikeda> Hehe. =)
+<Xian> Anywho, can I ask my next question now? =)
+<Xian> 
+<David Ikeda> Sure. =)
+<David Ikeda> 
+<Xian> (Sorry, I hate to get on your nerves like this...)
+<Xian> 
+<David Ikeda> I don't mind, this is fun.
+<Xian> Heh... okay. =)
+<Xian> 
+<David Ikeda> Zer gets on my nerves cause he doesn't appreciate help.
+<David Ikeda> He just insults me to get me to help him because I know something he accuses me of not knowing or a similar method like that.
+<Xian> Yeah...I know the feeling. The guy's a quack. ={
+<Xian> 
+<David Ikeda> I don't despise Zer though, just an example.. I haven't talked to him in a while so he hasn't bugged me as of late.
+<Xian> I don't hate him, either. But I think he's a fruit.
+<Xian> 
+<David Ikeda> Hehe.
+<David Ikeda> Yeah, I feel bad sometimes talking about Zer all the time, just a really good subject for examples of annoying people. =)
+<Xian> Okay...we'll avoid mentioning him again. =)
+<Sabin> hehe thats for sure :P
+<Sabin> 
+<Xian> 
+<David Ikeda> Anyways, what was the question? =)
+<Xian> Sorry...went off on a tangent there.
+<Xian> 
+<Xian> My question deals with saving images that have been changed in VB.
+<Xian> 
+<David Ikeda> Oh, I think I mentioned Zer in the first place, hehe.
+<David Ikeda> Ahhh!!!!
+<David Ikeda> Ahhhhhhhh!!!!
+<Xian> Either from hDC's on fake memory holders (fake picboxes), or from hDC's from actual picboxes..
+<Xian> 
+<Xian> 
+<Xian> Yeah, I kinda reacted the same way when I was trying to make a mask-maker for Sab's images.
+<Xian> 
+<David Ikeda> VB is evil about saving pictures, it won't save your palette correctly and it stores these freaky 16-bit bitmaps which can't be opened in most paint programs.
+<David Ikeda> Or that's VB 3, I dunno about 5.
+<Xian> Actually, I set my DirectX initialization to 16-bit (to handle Sab's palette). =)
+<Xian> 
+<David Ikeda> Cool.
+<Xian> 'cuz 256 isn't enough and 24-bit is way too much. =)
+<Xian> 
+<David Ikeda> But the main way to get an image into a picture is like this.. Pretty simple..
+<David Ikeda> It's autoredrawable right?
+<Xian> Yup.
+<Xian> 
+<David Ikeda> The picboxes fake/real.
+<David Ikeda> Oh okay.
+<David Ikeda> PictureBox.Picture = PictureBox.Image
+<David Ikeda> SavePicture PictureBox.Picture, "File"
+<Xian> Hmm....PictureBox."Image"?
+<Xian> 
+<Xian> Is that the same as hDC?
+<Xian> 
+<David Ikeda> Yep, image is the read-only property for what is drawn on it...
+<David Ikeda> Not really, hDC is just a reference to the picture box's contents.
+<Xian> Hm....
+<Xian> 
+<David Ikeda> Image is just like picture property, except it's virtual and changes as you PSET, print, line, bitblt, etc.
+<Xian> 'cuz I'm drawing the pixels one one by one (in pure white or black) with SetPixel and GetPixel, which work like BitBlt....with hDCs..
+<Xian> 
+<David Ikeda> Yeah, SetPixel is pretty nice. =)
+<David Ikeda> Bit slow in VB 3 though, but bet DirectX VB5 would be pretty fast.
+<Sabin> appears I accidently made ya a pixel short, Xian :P
+<Sabin> 
+<Xian> Yeah, except DX (through VB5 Type Libs) requires you to set the form to full-screen, which I don't like for utilities like a mask-maker or MapEditor...
+<Xian> 
+<Sabin> dangit
+<Sabin> 
+<Xian> Ah. =)
+<Xian> 
+<David Ikeda> Maybe you should not use DirectX until you get pretty far along your projects, just keep it windowed?
+<David Ikeda> If it's a pain to work with that is.
+<Sabin> I lost my remote again
+<Sabin> 
+<Xian> Don't worry 'bout it Sab. It's not a big deal 'til I get c/s done and that'll be a bit. =)
+<Xian> 
+<Sabin> its one pixel Xian it wont take me a long time to fix :P
+<Sabin> 
+<Xian> Yeah, I do. I finally got DX working perfectly in Insomnia (the game EXE), so I work in a window now.
+<Xian> 
+<David Ikeda> Oh, what resolution are you setting?
+<David Ikeda> 320*200 rules!
+<Xian> 640x480
+<Xian> 
+<David Ikeda> Oh cool.
+<Xian> He he... =)
+<Xian> 
+<David Ikeda> Oh wait, never mind, you guys have the huge chars, no need for 320*200.
+<Xian> Yeah. =)
+<Xian> 
+<David Ikeda> Mine has little tinsy guys. =)
+<Sabin> they arent huge :P
+<Sabin> 
+<David Ikeda> Huge compared to mine. =)
+<Sabin> The Realm has huge chars :P ours are miniscule
+<Sabin> 
+<Xian> You should see the one that Sab did. It wuz like The Realm's chars and it ROCKED. =)
+<Xian> 
+<David Ikeda> Mine you can't see without a magnifying glass on a 14-inch 1024*768.
+<David Ikeda> Cool. =)
+<Sabin> yeah I doubled the size of my char and smoothed it pixel by pixel
+<Sabin> 
+<David Ikeda> Cool, =)
+<David Ikeda>  =)
+<David Ikeda> 
+<Xian> I wuz gonna use 800*600, but I figured that it wasn't worth shutting out ppl with weaker computers for a little more room...
+<Xian> 
+<David Ikeda> Yeah, 16-bit 800*600 requires at least 1 meg of video memory I think, and lotsa people I know still are limited to 640*480 high color.
+<Xian> Really?! Yikes.
+<Xian> 
+<David Ikeda>  with like 512kb or something.
+<Xian> Ditto...and this 'puter is 4 years old.
+<Xian> 
+<David Ikeda> Yeah, I just have right at 1 meg and the highest I can go with 16-bit is 800*600, but at my school the computers have 512kb 486s and can run 640*480 16-bit.
+<David Ikeda> Hehehehe.
+<Xian> My school has 16 MHz 386s w/o HDD's....just networked everything.
+<Xian> 
+<David Ikeda> 
+<Xian> If you boot all 32 'puters into windows 3.11, it takes all day. =)
+<Xian> 
+<David Ikeda> Mine just recently got one P200mmx in each classroom.
+<Xian> Wow...
+<Xian> 
+<David Ikeda> But 1 sucks cause now everyone wants to use the good one.
+<Xian> Heh...
+<Xian> 
+<Xian> Yeah, I'm actually getting my own computer soon. I just got the phone # of a company I wanna buy from today.
+<Xian> 
+<David Ikeda> Win 95 loading up on the P200MMXes take longer than the 486/25SXs loading win 3.11. =)
+<David Ikeda> Yep.
+<David Ikeda> And it has very few drivers on the win 95 too.
+<Xian> REALLY? My cousin's (she's a mother, so she's old) computer is a 200MMX and boots 95 in about 30 seconds...less, even.
+<Xian> 
+<David Ikeda> Win 95 is alwaysa long.
+<Sabin> mine takes about 50 seconds
+<Sabin> 
+<David Ikeda> Yeah, the schools is right around 30 seconds, but the 486/25s load win 3.1 in about 10 or 15 seconds.
+<David Ikeda> 
+<Xian> Yeesh....I have a P/120, 16 Megs. Takes about 6 minutes to boot 95. =P
+<Xian> 
+<David Ikeda> Hehe.
+<David Ikeda> Mine is like 2 but I have minimal stuff.
+<David Ikeda> P100 16 megs.
+<Xian> Heh...I almost have 3 gigs fulla my crud. =}
+<Xian> 
+<David Ikeda> I really need 32 megs, they got a 16 meg upgrade on one of the P200s to 32, and it just made it so you never load or anything or pause when you hit stuff like the start button.
+<David Ikeda> Mine occasional lags a second before the start button shows and stuff.
+<Sabin> what the hell was I thinking when I drew this :P
+<Sabin> 
+<Xian> Heh....it's okay, Sab. =)
+<Xian> 
+<David Ikeda> Hehe, I am getting a jazz drive this weekend. =)
+<Xian> How 'bout your "Create New..." option? Mine lags about 5 seconds...
+<Xian> 
+<Sabin> theres a pixel of here and a pixel off there its crazy :P
+<Sabin> 
+<David Ikeda> For a $20 disk, you can store up to 2 gigs, small and easy to manage like a floppy, just slightly larger.
+<David Ikeda> Jaz, dunno the spelling.
+<Xian> Uh....Jaz? I might get SyQuest if I were you. I hear nothing good about Jaz's....
+<Xian> 
+<Sabin> I have a writeable CD rom
+<Sabin> 
+<Xian> Yeah, Sab can pirate stuff. =)
+<Xian> 
+<David Ikeda> nothing good? I love zip drive from IoMega...
+<David Ikeda> I love my zip drive. =)
+<Xian> You have a zip and like it? Then don't listen to me. I'm just going by hearsay. =)
+<Xian> 
+<Sabin> hehehe yeah I can go to some place, buy a cd, copy it and return it for my money back :P
+<Sabin> 
+<David Ikeda> Oh, I'll take a look into SyQuest, thanks. Maybe it's even better.
+<David Ikeda> The only thing I absolutely despised spending money on was my backup tape drive.
+<Xian> I just hear a bunch of bad things about IoMega reliability and worth...
+<Xian> 
+<David Ikeda> It stores 2 gigs a tape, but you can't copy stuff off and on with a drive letter.
+<Xian> But it's probably opinionated...
+<Xian> 
+<David Ikeda> You got to use this special utility to backup things, and it's nearly impossible to work one file copying at a time, plus you gotta catalog everything you store and want to restore.
+<David Ikeda> 
+<David Ikeda> Oh.
+<Xian> Yeah, tape sux something aweful...
+<Xian> 
+<David Ikeda> Only reason for tape is backing up.
+<David Ikeda> I was hoping to move things, not back up, and release some space off my hard drive.
+<David Ikeda> I wish win 95 didn't have half its applications install DLLs and VBXs and all sorts of junk into the windows directory.
+<Xian> Ah... Well, for $20, I'd backup, too. 'cuz it'd be fast (as hard drive, appearantly), and you could schedule it for, say, 4:30 am....
+<Xian> 
+<David Ikeda> I still have a habit of deleting manually instead of uninstalling, and I've got 480 megs in windows now.
+<Xian> 480? Wow...I don't even have that much...
+<Xian> 
+<David Ikeda> Well, backup drive is not that fast..
+<David Ikeda> It's about 7 megs a second, although it's supposed to go up to 9 megs...
+<Xian> Font test.
+<Xian> 
+<David Ikeda> And that seems a lot, but my hard drive can copy like my whole windows directory in a few minutes, while backup tape takes like 20 minutes.
+<David Ikeda> The thing with backup is it's not so fast at seeking and moving to new file names..
+<David Ikeda> So if you have a bunch of small files in a directory, it takes forever.
+<David Ikeda> It's fast at writing a big file though.
+<Xian> Ah...
+<Xian> 
+<David Ikeda> Ah.
+<David Ikeda> It's probably a whole lot better than mine. =)
+<Xian> I haven't actually used a tape, myself. My Mom has one at her office that she showed me one time when I picked her up from work...it looked like an annoying process.
+<Xian> 
+<David Ikeda> Writeable CD rom is awesome.
+<Xian> Doubtful. She has a PR/133, 16, 1 gig, and other horrible stuff.
+<Xian> 
+<David Ikeda> I just wish you could remove stuff besides just writing.
+<Sabin> CDs are cheap
+<Sabin> 
+<David Ikeda> Since I move things back and forth among lots of my zips.
+<Xian> Get CD-R/RW
+<Xian> 
+<David Ikeda> How much is a blank CD?
+<Sabin> bout a buck 75 cents
+<Sabin> 
+<David Ikeda> A BUCK and 75 cents???
+<David Ikeda> For 640 megs?
+<Sabin> yeah
+<Sabin> 
+<Sabin> yup
+<Sabin> 
+<David Ikeda> That rules like totally, I changed my mind, I'm buying a CD-R this weekend.
+<Xian> Like that Creative thingy. So if you want disks to write CDs everyone can use, use the CD-R. If you want lots of storage and re-writability, use CD-RW...
+<Xian> 
+<Sabin> I have 2 speed write, 8 speed read
+<Sabin> 
+<David Ikeda> How much was that?
+<David Ikeda> I don't mind not being able to remove things from a CD if it's less than 5 dollars.
+<Sabin> dunno, my parents sent it for my birthday :P
+<Sabin> 
+<Xian> BTW, do NOT get DVD or DVD-writing drives. There's a new thin blue laser technology that's coming out that can write 670 gigs to a single disk.
+<Xian> 
+<David Ikeda> I thought DVD stores like 18 gigs or something.
+<Sabin> can get 5 for like 8 bucks or so
+<Xian> DVD stores 4.7 gigs/side.
+<Sabin> 
+<Xian> 
+<David Ikeda> Oh.
+<Sabin> CDs
+<Sabin> 
+<David Ikeda> A new blue laser technology? Wah!!!!
+<David Ikeda> I want to buy something this weekend.
+<David Ikeda> Poo, I guess I should wait.
+<David Ikeda> A 2X+ write is fine for me, I don't care what read it is, can even be like 4x.
+<David Ikeda> I have $480, wonder if that's enough.
+<Xian> Well, I'd get CD-R. CD is gonna be around for a long time....'til this blue laser thingy comes out. And when everyone knows about it, DVD will be stomped out (though I kinda liked the idea of DVD, 670 gigs/disk is pretty hard to beat. =)
+<Xian> 
+<David Ikeda> Hehe.
+<David Ikeda> That would give you some major warez.
+<David Ikeda> Sell a lifetime of warez for a few bucks.
+<David Ikeda> Hehe, I'll just copy CDs like floppy disks.
+<Xian> Yeah...I have a friend in University who bought about 8 warez CDs with thousands and thousands of dollars worth of proggies on 'em for $30 Canadian. =)
+<Xian> 
+<David Ikeda> Cool! =)
+<Xian> Yeah, same with Japan. According to Sabin.
+<Xian> 
+<David Ikeda> I went to Hong Kong once, and they just sell pirated software like a totally legal item.. I thiCopyright Laws are only in US.
+<David Ikeda> Yeah, I went to Japan earlier last year, although they don't have some of the better stuff I thought.
+<Xian> afk for a sec
+<Xian> 
+<David Ikeda> Japan's computer technology is poor.
+<David Ikeda> Weird cause I'm half-Japanese and everyone assumes I'm good at computers because I look sorta Japanese and America, Canada, and some Europian countries and Australia are probably the leading in computer tech.
+<David Ikeda> Japanese just have console systems.
+<Xian> Yeah. Say, Dave, can I quickly copy all the stuff you wrote before so I don't forget? =)
+<Xian> 
+<David Ikeda> Oh okay. =)
+<Xian> thanks
+<Xian> 
+<Sabin> what the hell
+<Sabin> 
+<David Ikeda> One sec.
+<David Ikeda> Why don't ya try save buffer?
+<Xian> 
+<Xian> Heh..good idea. =)
+<Xian> 
+<David Ikeda> Just an idea. =)
+<Sabin> the female char is significatly thinner than the male, BUT the guide shows that shes 2 pixels wider
+<Sabin> 
+--------------------------------------

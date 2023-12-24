@@ -1,0 +1,52 @@
+What I do is make an array.
+Make Socket(0) listening.
+When it gets in a listening/accept event...
+Ah.
+That works if you want to make a game with one connection.
+Just as long as you reset it to listen each time it disconnects.
+Hehe.
+Yep.
+Okay...
+What was I saying again? =)
+Sorry, got lotsa people talking.
+Okay..
+What I do is make an ar with socket(0) listening.
+When Socket(0) triggers the listen/accept event, whatever the control has...
+Accept to Socket(1)...
+Then if another one connects..
+Accept to socket(2).
+And in form_load...
+Do this.
+Dim Temp as integer
+For Temp = 1 to PlayerCount(Whatever max players you want)
+Load Socket(Temp)
+Next
+
+Then when server accepts..
+Do this.
+Dim Temp1 as integer
+For Temp1 = 1 not Socket(Temp1).Connected(Or however you check to see if it's connected) then Socket(Temp1).Accept = ID
+Something along those lines.
+Just make it accept to a new, unconnected socket each time, and make sure it's not already listening or connected.
+And to make it reusable, check if it's connected property is true if it has one.
+If it doesn't have one, do like this:
+When it accepts, have an array like
+SocketConnected(1 to PlayerCount) as integer
+
+
+Socket(Temp1).Accept = ID
+SocketConnected(Temp1) = True
+
+And to check
+for Temp = 1 to PlayerCount
+Inot SockConnected(Temp) then Socket(Temp).Accept = ID
+Get the picture? =)
+
+That'll allow multiple plus reusable.
+Oh thanks, no prob. =)
+Good luck. =)
+I still wanna show ya SSL though. =)
+Wonder what that device prob is.
+The only thing I can think of that crashed you in Odyssey that I put into SSL to crash you is Domain lookup.
+I made it Ikedasoft.dyn.ml.org instead of actually getting my direct IP fro
+Okay, sorry, sure. =)

@@ -1,0 +1,74 @@
+<Phirth> Sub Form_KeyDown (KeyCode As Integer, Shift As Integer)
+<Phirth> If PlayerIsMoving = True Or MapOffsetX% <> 0 Or MapOffsetY% <> 0 Then Exit Sub
+<Phirth> Select Case KeyCode
+<Phirth> Case KEY_LEFT
+<Phirth>     If cViewMap(3, 4).Walls = "" Then
+<Phirth>         PlayerDirection = DIR_LEFT
+<Phirth>         PlayerIsMoving = True
+<Phirth>     End If
+<Phirth> Case KEY_RIGHT
+<Phirth>     If cViewMap(5, 4).Walls = "" Then
+<Phirth>         PlayerDirection = DIR_RIGHT
+<Phirth>         PlayerIsMoving = True
+<Phirth>     End If
+<Phirth> Case KEY_UP
+<Phirth>     If cViewMap(4, 3).Walls = "" Then
+<Phirth>         PlayerDirection = DIR_UP
+<Phirth>         PlayerIsMoving = True
+<Phirth>     End If
+<Phirth> Case KEY_DOWN
+<Phirth>     If cViewMap(4, 5).Walls = 
+<Phirth>     If cViewMap(4, 5).Walls = "" Then
+<Phirth>         PlayerDirection = DIR_DOWN
+<Phirth>         PlayerIsMoving = True
+<Phirth>     End If
+<Phirth> End Select
+<Phirth> End Sub
+<Phirth> Sub Form_KeyUp (KeyCode As Integer, Shift As Integer)
+<Phirth> PlayerIsMoving = False
+<Phirth> End Sub
+
+Type MapDbs
+<Phirth>     BitBlt As String * 2
+<Phirth>     Transparent As String * 2
+<Phirth>     Special As String * 2
+<Phirth>     Foreground As String * 2
+<Phirth>     Scripting As String
+<Phirth>     Walls As String
+<Phirth>     Properties As String
+<Phirth> End Type
+
+<Phirth> 'Here it should add/subtract to the MapOffsetX%
+<Phirth> 'and MapOffsetY%, and then the CurrentX and CurrentY
+<Phirth> ccx% = CurrentX
+<Phirth> ccy% = CurrentY
+<Phirth> If PlayerIsMoving = True Or MapOffsetX% <> 0 Or MapOffsetY% <> 0 Then
+<Phirth>     Select Case PlayerDirection
+<Phirth>     Case DIR_UP
+<Phirth>     MapOffsetY% = MapOffsetY% + 4
+<Phirth>     If MapOffsetY% = 64 Then CurrentY = CurrentY - 1: MapOffsetY% = 0: ChkZoop ccx%, ccy%
+<Phirth>     Case DIR_DOWN
+<Phirth>     MapOffsetY% = MapOffsetY% - 4
+<Phirth>     If MapOffsetY% = -64 Then CurrentY = CurrentY + 1: MapOffsetY% = 0: ChkZoop ccx%, ccy%
+<Phirth>     Case DIR_LEFT
+<Phirth>     MapOffsetX% = MapOffsetX% + 4
+<Phirth>     If MapOffset
+<Phirth>     MapOffsetX% = MapOffsetX% + 4
+<Phirth>     If MapOffsetX% = 64 Then CurrentX = CurrentX - 1: MapOffsetX% = 0: ChkZoop ccx%, ccy%
+<Phirth>     Case DIR_RIGHT
+<Phirth>     MapOffsetX% = MapOffsetX% - 4
+<Phirth>     If MapOffsetX% = -64 Then CurrentX = CurrentX + 1: MapOffsetX% = 0: ChkZoop ccx%, ccy%
+<Phirth>     End Select
+<Phirth> End If
+<Phirth> If MapOffsetX% <> 0 Or MapOffsetY% <> 0 Or PlayerIsMoving = True Then
+<Phirth>     Select Case PlayerDirection
+<Phirth>     Case DIR_UP
+<Phirth>     If cViewMap(4, 3).Walls = "Y" Then MapOffsetX% = 0: MapOffsetY% = 0
+<Phirth>     Case DIR_DOWN
+<Phirth>     If cViewMap(4, 5).Walls = "Y" Then MapOffsetX% = 0: MapOffsetY% = 0
+<Phirth>     Case DIR_LEFT
+<Phirth>     If cViewMap(3, 4).Walls = "Y" Then MapOffsetX% = 0: MapOffsetY% = 0
+<Phirth>     Case DIR_RIGHT
+<Phirth>     If cViewMap(5, 4).Walls = "Y" Then MapOffsetX% = 0: MapOffsetY% = 0
+<Phirth>     End Select
+<Phirth> End If

@@ -1,0 +1,28 @@
+Private Sub Form_Click()
+Unload Me 'Close credit window
+End Sub
+
+Private Sub Form_Load()
+lblInfo.Caption = "If you would like to joing our programming team to produce sound effects, graphics, or programming, please send your application to: 'std@leo.net.gull-lake.sk.ca'. Include examples of your past work."
+
+End Sub
+
+Private Sub fraGraphics_Click()
+Unload Me 'Close credit window
+End Sub
+
+Private Sub fraProg_Click()
+Unload Me 'Close credit window
+End Sub
+
+Private Sub Label1_Click()
+Unload Me 'Close credit window
+End Sub
+
+Private Sub lblGraphics_Click()
+Unload Me 'Close credit window
+End Sub
+
+Private Sub lblXian1_Click()
+Unload Me 'Close credit window
+End Sub

@@ -1,0 +1,83 @@
+<> <> IMMIDIATE <> <>
+
+- Use the same FuncTimeOut call for all animation
+- Update remote player movement so it all occurs at once?
+
+TEST
+  - MIDI (Find Win32 API?)
+
+CLIENT / SERVER
+  - Running EXEs from home - Telnet?
+  - Encrypt .BMPs in /Archive/
+
+PLAYER MOVEMENT
+  - Emotes, etc.
+  - Players turn w/o moving - using shift key
+
+MAPS
+  - BottomTiles.bmp to BotTiles.bmp
+  - Multiple maps - 'warps'
+  - "Title/Name" property, Music property (record in record# 1 and 2)
+  - Minimap on the right
+
+ADVANCED C/S
+  - Dynamic # of max players
+
+
+- Add 3D buttons instead of labels
+- Text box length limits?
+- Re-arrange icons on desktop after dx unload?
+- character transparent blits - clothing
+  - pants, shirts, then hair/helmet.
+- Animated map tiles
+- NPCs/Monsters - CTRL for attack
+
+<> <> "MORE" VB 5 FOR DUMMIES <> <>
+
+- Progress bar for auto-updater
+
+<> <> ANIMATION <> <>
+
+- 5-frame animation?
+- diagonal animation?
+
+<> <> GAME CODE <> <>
+
+- Menu System?
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+MIDI INSTRUMENTS
+ALL PIANOS ARE THE SAME, EXCEPT:
+Honky Tonk        - Echos
+Rhodes            - Very light, soft
+
+Harpsicord        - Shops
+Celesta           - Xylaphony-sorta sound
+Glocenspiel       - Xylaphone w/ an echo - LOW
+Music Box         - Steel Drums - HIGH
+Steel Drums       - Steel Drums - LOW
+Vibraphone        - Xylaphone w/ echo - HIGH
+Marimba           - Xylaphone cut short
+Xylaphone         - Xylaphone - Chinese
+Tubular Bells     - Echoing Doorbell/chime sound
+Dulcimer          - Boinking sound
+Hammond Organ     - Echoing electronic organ
+Percussive Organ  - Low elec. Organ sound - thru a tube, almost
+Rock Organ        - Humming Electronic Organ
+Church Organ      - Light, Echoing organ
+Reed Organ        - Reed Sound
+Accordian         - Light air/elec. keyboard sound
+
+
+Wood Block        - Clicking/Tapping sound
+Taiko Drum        - Echoing Drum/string sound - ECHO
+Melodic Tom       - Drum/String sound
+Synthetic String  - Digital String/pluck sound
+Guitar Fret Noise - Screeching Guitar
+Breath Noise      - Soft shaker... slowly breaking waves
+Bird Tweet        - Slight whistle
+Telephone ring    - Xylaphone - HIGH
+Helicopter        - Helicopter blade sounds - very soft shaker
+Gunshot           - Light rustling sound
+

@@ -1,0 +1,294 @@
+Primary Server DNS:   204.83.201.2
+Secondary Server DNS: 142.165.5.2
+
+
+Town's Names:
+* Corbisia, Twilight
+Ugaria, Sonath, Waru, Rolath, Shabidia, Eokio, Larathus
+
+-=-=-
+Map Info
+Open mapfile$+".DAT" For Random As #1 Len=Len(MapDb)
+
+-=-=-
+
+RACES:
+Human, Elf, Dwarf, Gnomes, Sprites
+
+STATS:
+Strength(and Defence?)
+Speed
+Intelligence
+Dexterity
+Endurance (ie. 10 End. = 1 HP/level)
+
+SPELLS:
+Gained from books or passing levels
+Trained by using
+
+-=-=-
+KEYUP for GetTickCount() Char anims
+
+Dim OffSetXCheck As Long
+Dim OffSetYCheck As Long
+Dim Count As Long
+
+CharIsMoving = False
+
+OffSetXCheck = Abs(MapOffSetX \ 32)
+OffSetYCheck = Abs(MapOffSetY \ 32)
+
+Do Until Abs(MapOffSetX / 32) = OffSetXCheck
+
+    DoEvents
+    Count = GetTickCount()
+
+    '[ANIMATION SEQUENCE]
+    'Call CheckUpDown(Char)
+        
+    Char.Spry = 64    'Face Up
+        
+    Select Case Char.Frame
+        
+        Case 1
+        Char.Frame = 2
+        Char.Sprx = 64
+            
+        Case 2
+        Char.Frame = 3
+        Char.Sprx = 32
+            
+        Case 3
+        Char.Frame = 4
+        Char.Sprx = 0
+            
+        Case 4
+        Char.Frame = 1
+        Char.Sprx = 32
+            
+    End Select
+        
+    MapOffSetX = MapOffSetX + dx
+        
+    DoEvents
+    While Abs(GetTickCount() - Count) < 33: Wend 'Pause between frames
+    
+Loop
+
+-=-=-
+
+To move down a line:
+Chr$(13)+Chr$(10)
+
+DIRECTX SUPPORT w/o REAL DIRECT X!!!
+
+dixu.bas
+sprite.cls
+directx5.tlb
+
+For 16-bit mode: dixuInit dixuInitFullscreen, Me, 640, 480, 16
+When your program ends: dixuDone
+
+
+Sabin's Name: Dustin Armour
+
+Port1: 204.83.231.14
+thru 10: to 204.83.231.24
+
+Use IRC Port (Port 6667), with the winsock control.
+Or Telnet port:23
+
+-=-=-
+Keycodes (for movement) are as follows:
+(Second # is for the numberpad arrows)
+
+Left  - 37, 100
+Right - 38, 102
+Up    - 39, 104
+Down  - 40, 98
+-=-=-
+
+-=-=-
+Cursors should have their "pusher-pixel" 17 pixels from the left, and 
+13 pixels from the top of the 32*32 grid on which they're made.
+-=-=-
+
+-=-=-
+The following code is for finding the directory in which your EXE is 
+in. It sees if the the dir has "/" as a last letter, and if not, it 
+adds it. (So you don't get C:/dir1/dir2/dir3YOURFILE.EXE)
+
+Path = App.Path
+If Right(Path, 1) <> "\" Then
+   Path = Path + "\"
+End If
+
+-=-=- BULLET INFO -=-=-
+
+Dim Bullet As tSprite  'The Bullet is a sprite
+-----
+Private Sub CheckBullet()
+Dim Retcode As Long
+
+If Bullet.Active = 1 Then
+    If Bullet.left > 0 And Bullet.left < ScreenWidth And Bullet.top > 0 And Bullet.top < ScreenHeight Then
+        Call PaintSprite(Bullet)
+        Bullet.left = Bullet.left + (Bullet.XDir * dx)
+        Bullet.top = Bullet.top + (Bullet.Ydir * dy)
+    Else
+        Bullet.Active = False
+    End If
+End If
+End Sub
+ >> Call this Subroutine in the BoardRefresh Subroutine
+-----
+
+Private Sub Bullet_Init()
+Bullet.Active = False    'sprite active
+Bullet.ident = 0         '0 = bulletsprite can be 0,1,2
+Bullet.left = 0   'left coord
+Bullet.top = 0       'top coord
+Bullet.Width = 25    'width of sprite
+Bullet.Height = 25   'height of sprite
+Bullet.Sprx = 0            'frame offset x
+Bullet.Spry = 70           'frame offset y
+Bullet.mapx = 0          'board index loc x
+Bullet.mapy = 0          'board index loc x
+Bullet.doing = 0   'index to what it is doing 0 = standing
+Bullet.XSpeed = 0  'x speed in pixels
+Bullet.YSpeed = 0  'y speed in pixels
+Bullet.XDir = 0    '+1 or -1 dir
+Bullet.Ydir = 0    '+1 or -1 dir
+'source area for bulletbitmap
+Bullet.src.hdc = PicSprite.hdc
+Bullet.src.left = PicSprite.left
+Bullet.src.top = PicSprite.top
+Bullet.src.Width = PicSprite.Width
+Bullet.src.Height = PicSprite.Height
+'mask area for bulletmask bitmap
+Bullet.mask.hdc = PicMask.hdc
+Bullet.mask.left = PicMask.left
+Bullet.mask.top = PicMask.top
+Bullet.mask.Width = PicMask.Width
+Bullet.mask.Height = PicMask.Height
+'default background ususally a work or save area to paint to
+Bullet.bkg.hdc = PicWork.hdc
+Bullet.bkg.left = PicWork.left
+Bullet.bkg.top = PicWork.top
+Bullet.bkg.Width = PicWork.Width
+Bullet.bkg.Height = PicWork.Height
+'end of init bullet
+
+End Sub
+-----
+            
+        'User fires a bullet
+        Case KEY_SPACE:
+          If Bullet.Active <> 1 Then
+            Bullet.Active = 1
+            If Char.XDir = 1 Then
+                Bullet.left = Char.left
+                Bullet.top = Char.top
+                Bullet.XDir = 1
+                Bullet.Ydir = 0
+                Bullet.Sprx = 25
+            ElseIf Char.XDir = -1 Then
+                Bullet.left = Char.left
+                Bullet.top = Char.top
+                Bullet.XDir = -1
+                Bullet.Ydir = 0
+                Bullet.Sprx = 25 * 2
+            ElseIf Char.Ydir = 1 Then
+                Bullet.left = Char.left
+                Bullet.top = Char.top
+                Bullet.XDir = 0
+                Bullet.Ydir = 1
+                Bullet.Sprx = 25 * 3
+            ElseIf Char.Ydir = -1 Then
+                Bullet.left = Char.left
+                Bullet.top = Char.top
+                Bullet.XDir = 0
+                Bullet.Ydir = -1
+                Bullet.Sprx = 0
+            End If
+          End If
+    End Select
+-----
+
+
+OLD WALL DETECT CODE
+
+If xID <> Char.x And yID <> Char.y Then
+
+    If MapHolder(Int(Char.x) + 2, Int(Char.y) + 3).IsWall = True Then
+    RightIsSolid = True
+    Else: RightIsSolid = False
+    End If
+        
+    If MapHolder(Int(Char.x), Int(Char.y) + 3).IsWall = True Then
+    LeftIsSolid = True
+    Else: LeftIsSolid = False
+    End If
+
+ElseIf xID <> Char.x Then
+
+    If MapHolder(Int(Char.x) + 1, Int(Char.y) + 3).IsWall = True Then
+    RightIsSolid = True
+    Else: RightIsSolid = False
+    End If
+        
+    If MapHolder(Int(Char.x), Int(Char.y) + 3).IsWall = True Then
+    LeftIsSolid = True
+    Else: LeftIsSolid = False
+    End If
+    
+ElseIf yID <> Char.y Then
+
+    If MapHolder(Int(Char.x) + 3, Int(Char.y) + 2).IsWall = True Then
+    RightIsSolid = True
+    Else: RightIsSolid = False
+    End If
+        
+    If MapHolder(Int(Char.x), Int(Char.y) + 2).IsWall = True Then
+    LeftIsSolid = True
+    Else: LeftIsSolid = False
+    End If
+
+[KEYBOARD SPEED CODE]
+
+'[FUNCTIONS: Keyboard]
+Declare Function SystemParametersInfo Lib "user32" Alias "SystemParametersInfoA" (ByVal uAction As Long, ByVal uParam As Long, ByVal lpvParam As Any, ByVal fuWinIni As Long) As Long
+
+'Public OldKeySpeed
+Const SPI_GETKEYBOARDSPEED = 10
+Const SPI_SETKEYBOARDSPEED = 11
+Public Const SPIF_SENDWININICHANGE = &H2
+Public Const SPIF_UPDATEINIFILE = &H1
+Const NewKeySpeed = 6
+
+Public Sub GetKeyRepeat()
+Dim Dummy
+Dim OldKeySpeed
+
+'Here is the psuedo-code:
+'Dumy = SystemParametersInfo(SPI_ThingToBeChanged, 0 For GET - value for SET, Returns a value for GET is NULL for SET, SPIF_UPDATEINIFILE Or SPIF_SENDWININICHANGE)
+
+Dummy = SystemParametersInfo(SPI_GETKEYBOARDSPEED, 0, OldKeySpeed, SPIF_UPDATEINIFILE Or SPIF_SENDWININICHANGE)
+
+txtInfo.Text = Str(OldKeySpeed)
+
+End Sub
+
+Public Sub SetKeyRepeat()
+Dim Dummy
+
+Dummy = SystemParametersInfo(SPI_SETKEYBOARDSPEED, NewKeySpeed, Chr$(0), SPIF_UPDATEINIFILE Or SPIF_SENDWININICHANGE)
+
+End Sub
+
+Public Sub ResetKeyRepeat()
+Dim Dummy
+
+Dummy = SystemParametersInfo(SPI_GETKEYBOARDSPEED, OldKeySpeed, Chr$(0), SPIF_UPDATEINIFILE Or SPIF_SENDWININICHANGE)
+
+End Sub

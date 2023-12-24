@@ -1,0 +1,307 @@
+Option Explicit
+
+Dim MapFile As String 'The map file to open on startup
+Dim MapHolder(1 To 41, 1 To 41) As Record
+Dim Path As String
+
+Dim TileSize As Integer
+Dim PicTile As tArea 'Tile Hdc for images
+Dim PicWork As tArea
+Dim Tile As Integer
+
+Private Sub Initializations()
+
+Dim Dummy
+
+'[Set Variables to values]
+TileSize = 32
+
+'[Set paths to game location on Hard Disk]
+If (Right(App.Path, 1) <> "\") Then
+    Path = App.Path & "\"
+        Else
+Path = App.Path
+End If
+'[End of Set Paths]
+
+'[Map Initializations]
+
+
+'[Form Initializations]
+frmMap.ScaleMode = 3
+
+'[Main View Initializations]
+picMain.ScaleMode = 3
+picMain.Width = 320 'ScreenWidth
+picMain.Height = 320 'ScreenHeight
+
+'[Set the icon for the main form]
+picMain.Picture = LoadPicture(Path & "map.ico")
+frmMap.Icon = picMain.Picture 'Set icon for main form
+picMain.Cls 'Clear off the icon image from the main screen
+picMain.Picture = LoadPicture() 'Same as .CLS
+
+'[Mem Hdc to hold maptiles]
+PicTile.hdc = 0
+PicTile.Left = 0
+PicTile.Top = 0
+PicTile.Width = 32 'Width of the memory holder
+PicTile.Height = 32 'Height of the memory holder
+PicTile.hdc = CreateMemHdc(picMain.hdc, TileSize, TileSize)
+Call LoadBmpToHdc(PicTile.hdc, "MapForm.dll")
+
+
+'[Mem hDC to hold the map and work]
+picMain.Picture = LoadPicture(Path + "mapForm.dll") 'Set Palette
+Dummy = SelectPalette(PicWork.hdc, picMain.Picture.hPal, False)
+Dummy = RealizePalette(PicWork.hdc)
+picMain.Cls 'Clear palette-setting image
+picMain.Picture = LoadPicture(Path + "BackCover.bmp")
+
+PicWork.hdc = 0
+PicWork.Left = 0
+PicWork.Top = 0
+PicWork.Width = 640
+PicWork.Height = 640
+PicWork.hdc = CreateMemHdc(picMain.hdc, 640, 640)
+
+'[Pink image to cover up the ugly stuff in the hDC]
+'picMain.Picture = LoadPicture(Path + "BackCover.bmp")
+'PicWork.hdc = picMain.Picture
+'picMain.Cls
+
+
+End Sub
+
+Private Sub btnDebug1_Click()
+    Debug.Print MapHolder(2, 1).IsWall
+End Sub
+
+Private Sub Form_Load()
+
+Call Initializations
+
+End Sub
+
+Private Sub Form_Unload(Cancel As Integer)
+
+Close #1 'Close the map file from RAM
+Call DestroyHdcs
+
+End Sub
+
+Private Sub mnu10_Click()
+    MapHolder(1, 1).MapSize = 10
+    VertBar.Max = 10
+    HorizBar.Max = 10
+    'picMain.Width = 320 'Adjust the main view to 32* the tilesize selected
+    'picMain.Height = 320
+    'Put #1, 43, MapHolder(1, 1) 'Write record to file.
+End Sub
+
+Private Sub mnu20_Click()
+    MapHolder(1, 1).MapSize = 20
+    VertBar.Max = 20
+    HorizBar.Max = 20
+    'picMain.Width = 640
+    'picMain.Height = 640
+    'Put #1, 43, MapHolder(1, 1) 'Write record to file.
+End Sub
+
+Private Sub mnu40_Click()
+    MapHolder(1, 1).MapSize = 40
+    VertBar.Max = 40
+    HorizBar.Max = 40
+    'picMain.Width = 1280
+    'picMain.Height = 1280
+    'Put #1, 43, MapHolder(1, 1) 'Write record to file.
+End Sub
+
+Private Sub mnuExit_Click()
+Unload Me
+End Sub
+
+Private Sub mnuOpen_Click()
+
+Close #1 'Close the file in case the app crashed last time.
+
+CommonDialog1.Filter = "Map Files (*.MAP)|*.MAP|MapData Files (*.DAT)|*.DAT|All Files (*.*)|*.*"
+CommonDialog1.FilterIndex = 1 'Set to .MAP as default
+CommonDialog1.Action = 1 'Open a "Open File" box
+
+MapFile = CommonDialog1.filename 'MapFile equals the filename chosen
+'frmMap.Caption = frmMap.Caption + " - " + MapFile
+
+If MapFile = "" Then 'If they choose "cancel"
+    Exit Sub 'Leave the open box
+Else
+    Open MapFile For Random As #1 Len = Len(MapHolder(41, 41))
+    'Open the file chosen in 'Open File'
+End If
+
+MapHolder(1, 1).MapSize = 20
+
+VertBar.Value = 1
+HorizBar.Value = 1
+
+
+
+'Dim y As Integer, x As Integer
+'Dim TileY, TileX
+'Dim RecordNum As Long
+'Dim Dummy
+
+'[Change the x/y location to a *32 location]
+'TileX = Int(x / 32) '- (TileSize / 2)
+'TileY = Int(y / 32) '- (TileSize / 2)
+
+'For y = 1 To 20
+'    For x = 1 To 20
+
+'    RecordNum = (TileX * (MaxCoord + 1)) + TileY
+
+'    Select Case Tile
+'    Case 1
+'    Dummy = BitBlt(picMain.hdc, TileX, TileY, 32, 32, PicTile.hdc, 0, 0, SRCCOPY)
+'    Case 2
+'    Dummy = BitBlt(picMain.hdc, TileX, TileY, 32, 32, PicTile.hdc, 32, 0, SRCCOPY)
+'    Case 3
+'    Dummy = BitBlt(picMain.hdc, TileX, TileY, 32, 32, PicTile.hdc, 64, 0, SRCCOPY)
+'    End Select
+
+'    Next x
+'Next y
+
+
+End Sub
+
+Private Sub mnuSave_Click()
+Dim x, y
+Dim RecordNum As Long
+
+For y = 1 To 20 Step 1
+    
+    For x = 1 To 20 Step 1
+    
+    RecordNum = (x * (MaxCoord + 1)) + y
+    Put #1, RecordNum, MapHolder(x, y)
+    'Write records to file.
+    
+    Next x
+Next y
+
+End Sub
+
+Private Sub mnuTileBrick_Click()
+    Tile = 2
+    mnuTileStone.Checked = False
+    mnuTileBrick.Checked = True
+    mnuTileGrass.Checked = False
+End Sub
+
+Private Sub mnuTileGrass_Click()
+    Tile = 3
+    mnuTileStone.Checked = False
+    mnuTileBrick.Checked = False
+    mnuTileGrass.Checked = True
+End Sub
+
+Private Sub mnuTileStone_Click()
+    Tile = 1
+    mnuTileStone.Checked = True
+    mnuTileBrick.Checked = False
+    mnuTileGrass.Checked = False
+End Sub
+
+Private Sub picMain_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single)
+Dim Dummy
+Dim PixelX, PixelY 'Position on the 32*32 grid
+Dim TileY, TileX 'Position # to the mouseclick (ie. 128 = 4)
+Dim RecordNum As Long 'The current record
+
+'[Change the mouse-click location to a *32 location]
+TileX = Int(x / 32) '- (TileSize / 2)
+TileY = Int(y / 32) '- (TileSize / 2)
+PixelX = TileX * 32
+PixelY = TileY * 32
+
+If Button = 1 Then 'If Left button is clicked
+
+'Record the Position(record) of the tile
+RecordNum = (TileX + 1 * (MaxCoord + 1)) + TileY + 1
+
+    Select Case Tile
+    
+    Case 1
+    Dummy = BitBlt(PicWork.hdc, PixelX + (HorizBar.Value - 1) * 32, PixelY + (VertBar.Value - 1) * 32, 32, 32, PicTile.hdc, 0, 0, SRCCOPY)
+    MapHolder(TileX + (HorizBar.Value - 1), TileY + (VertBar.Value - 1)).IsWall = False
+    MapHolder(TileX + (HorizBar.Value - 1), TileY + (VertBar.Value - 1)).Tile = Tile 'Record the tile's image for that position
+    
+    Case 2
+    Dummy = BitBlt(PicWork.hdc, PixelX + (HorizBar.Value - 1) * 32, PixelY + (VertBar.Value - 1) * 32, 32, 32, PicTile.hdc, 0, 32, SRCCOPY)
+    MapHolder(TileX + Int(HorizBar.Value), TileY + Int(VertBar.Value)).IsWall = True
+    MapHolder(TileX + Int(HorizBar.Value), TileY + Int(VertBar.Value)).Tile = Tile 'Record the tile's image for that position
+    
+    Case 3
+    Dummy = BitBlt(PicWork.hdc, PixelX + (HorizBar.Value - 1) * 32, PixelY + (VertBar.Value - 1) * 32, 32, 32, PicTile.hdc, 0, 64, SRCCOPY)
+    MapHolder(TileX + (HorizBar.Value - 1), TileY + (VertBar.Value - 1)).IsWall = False
+    MapHolder(TileX + (HorizBar.Value - 1), TileY + (VertBar.Value - 1)).Tile = Tile 'Record the tile's image for that position
+    
+    Case Else
+        Exit Sub
+    End Select
+    
+    
+    Put #1, RecordNum, MapHolder(TileX + 1, TileY + 1) 'Write record to file.
+    
+ElseIf Button = 2 Then 'If Right button is clicked
+    PopupMenu mnuTile
+End If
+
+End Sub
+
+Private Sub Board_Refresh()
+Dim Dummy As Long 'dummy variable needed for blit
+
+'Update the working (invisible) background by copying the appropriate area
+'from the full map.
+'Dummy = BitBlt(PicWork.hdc, 0, 0, PicWork.Width, PicWork.Height, PicOrgBack.hdc, MapOffSetX + (Char.Width / 2), MapOffSetY + (Char.Height / 2), SRCCOPY)
+'Call PaintSprite(Char)
+
+'Update the main viewport by copying whatever has
+'been changed in the work area
+Dummy = BitBlt(picMain.hdc, 0, 0, 320, 320, PicWork.hdc, (HorizBar.Value - 1) * 32, (VertBar.Value - 1) * 32, SRCCOPY) 'VertBar.Value * 32
+
+End Sub
+
+Private Sub tmrPaint_Timer()
+
+Call Board_Refresh
+
+'Dim y As Integer, x As Integer
+'Dim TileY, TileX
+'Dim RecordNum As Long
+'Dim Dummy
+
+'[Change the x/y location to a *32 location]
+'TileX = Int(x / 32) + 1 '- (TileSize / 2)
+'TileY = Int(y / 32) + 1 '- (TileSize / 2)
+
+'For y = 1 To MapHolder(1, 1).MapSize
+'    For x = 1 To MapHolder(1, 1).MapSize
+    
+'    RecordNum = (TileX * (MaxCoord + 1)) + TileY
+
+'    Select Case Tile
+'    Case 1
+'    Dummy = BitBlt(picMain.hdc, TileX + VertBar.Value, TileY + HorizBar.Value, 32, 32, PicTile.hdc, 0, 0, SRCCOPY)
+'    Case 2
+'    Dummy = BitBlt(picMain.hdc, TileX + VertBar.Value, TileY + HorizBar.Value, 32, 32, PicTile.hdc, 32, 0, SRCCOPY)
+'    Case 3
+'    Dummy = BitBlt(picMain.hdc, TileX + VertBar.Value, TileY + HorizBar.Value, 32, 32, PicTile.hdc, 64, 0, SRCCOPY)
+'    End Select
+
+'    Next x
+'Next y
+
+End Sub

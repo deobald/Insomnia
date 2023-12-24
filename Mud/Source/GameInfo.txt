@@ -1,0 +1,127 @@
+Option Explicit
+'--------------------------------------------------
+' Global variables, constants and declaration.
+'--------------------------------------------------
+
+'[Area Data type - Solid image]
+Type tArea
+    hdc As Long
+    Left As Integer
+    Top As Integer
+    Width As Integer
+    Height As Integer
+End Type
+
+'[Sprite data type look at Char_init for meanings]
+Type tSprite
+    Active As Boolean
+    Ident As Integer
+    Width As Integer
+    Height As Integer
+    Sprx As Integer
+    Spry As Integer
+    Mapx As Integer
+    Mapy As Integer
+    XDir As Integer
+    YDir As Integer
+    src As tArea
+    bkg As tArea
+    mask As tArea
+    Frame As Integer
+    x As Single
+    y As Single
+End Type
+
+'[Properties for the map variable]
+Type Record
+    Tile As Integer
+    IsWall As Boolean
+    MapSize As Integer
+End Type
+
+Global Const MaxCoord = 41 'Maximum tile position
+
+' Color Constants
+Global Const DARK_GRAY = &H808080
+Global Const WHITE = &HFFFFFF
+Global Const BLACK = &H0&
+Global Const CYAN = &HFFFF
+
+' KeyCode constants
+Global Const KEY_LEFT = 37
+Global Const KEY_RIGHT = 39
+Global Const KEY_UP = 38
+Global Const KEY_DOWN = 40
+Global Const KEY_SPACE = 32
+
+
+' Windows GDI Bitmap API constants and functions
+' -Used so there are simple english refrences #s
+Global Const SRCCOPY = &HCC0020
+Global Const SRCINVERT = &H660046
+Global Const SRCPAINT = &HEE0086
+Global Const SRCAND = &H8800C6
+Public Const SRCERASE = &H440328
+
+'FUNCTIONS: Timing Sprite Movement
+Declare Function GetTickCount Lib "Kernel32" () As Long
+
+'FUNCTIONS: Manipulating Sprites
+Declare Function BitBlt Lib "gdi32" (ByVal hDestDC As Long, ByVal x As Long, ByVal y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal hSrcDC As Long, ByVal xSrc As Long, ByVal ySrc As Long, ByVal dwRop As Long) As Integer
+Declare Function SetPixel Lib "gdi32" (ByVal hdc As Long, ByVal x As Long, ByVal y As Long, ByVal crColor As Long) As Long
+Declare Function GetPixel Lib "gdi32" (ByVal hdc As Long, ByVal x As Long, ByVal y As Long) As Long
+
+'FUNCTIONS: Music and Sounds
+'[Music]
+'Declare Function mciSendString Lib "winmm.dll" Alias "mciSendStringA" (ByVal lpstrCommand As String, ByVal lpstrReturnString As Any, ByVal uReturnLength As Long, ByVal hwndCallback As Long) As Long
+Declare Function GetFocus Lib "User32" () As Long
+Const mciModeNotOpen = 524
+
+'[Sounds]
+Declare Function sndPlaySound Lib "winmm.dll" Alias "sndPlaySoundA" (ByVal lpszSoundName As String, ByVal uFlags As Long) As Long
+'The parameter lpszSoundName is the path & filename of the WAV file
+'you want to play. uFlags is used to specify different ways to play
+'the sound. See the constants below.
+
+Declare Function PlaySound Lib "winmm.dll" Alias "PlaySoundA" (ByVal lpszName As String, ByVal hModule As Long, ByVal dwFlags As Long) As Long
+'The parameter lpszName is the path & filename of the WAV file you
+'want to play. hModule is the name of the module where the sound
+'resource can be found if the sound is part of a resource file.
+'dwFlags is used to specify the type of sound lpszName specifies.
+
+'Constants used by the uFlags parameter
+Public Const SND_SYNC = &H0       'The sound is played synchronously. The
+                                  'function does not return until the sound ends.
+
+Public Const SND_ASYNC = &H1      'The sound is played asynchronously. The
+                                  'function returns immediately after beginning
+                                  'the sound. To terminate an asynchronously
+                                  'played sound, call SndPlaySound with
+                                  'lpszSoundName set to ""
+
+Public Const SND_NODEFAULT = &H2  'If the specified sound cannot be played, the
+                                  'function does not play the default sound.
+
+Public Const SND_MEMORY = &H4     'The parameter specified by lpszSoundName
+                                  'points to an in-memory image of a wave-
+                                  'form sound. Use this if your sounds are part
+                                  'of a resource file.
+
+Public Const SND_LOOP = &H8       'The sound continues to play repeatedly until
+                                  'sndPlaySound is called again with
+                                  'lpsSoundName set to "". You must also
+                                  'specify the SND_ASYNC flag to loop
+                                  'sounds.
+
+Public Const SND_NOSTOP = &H10    'If a sound is currently playing, the function
+                                  'immediately returns FALSE without playing
+                                  'the specified sound.
+
+Public Function FuncTimeOut(TOInterval As Single)
+
+Dim TOStart As Single
+TOStart = Timer
+Do: DoEvents: Loop Until Timer - TOStart >= TOInterval
+
+End Function
+

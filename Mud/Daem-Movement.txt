@@ -1,0 +1,63 @@
+--------------------------------------
+       ICQ Chat Save file     
+ Started on Fri Apr 17 17:50:25 1998
+
+--------------------------------------
+<Xian> Sorry, I hate chat windows...but you have me curious. =)
+<Ðæmíòµ§> ok...
+<Ðæmíòµ§> you have your engine like this,
+<Xian> Here, I'll type up a rough copy...
+<Xian> 
+<Ðæmíòµ§> 
+<Xian> routine1, we'll call this:
+<Xian> 
+<Xian> Goes thru a loop of all the players, sees the following things: Connected? Busy (animated)? Need to move (have a script)?
+<Xian> If all are true (well, busy would be false), then it calls the animation routine with the appropriate direction.
+<Xian> 
+<Xian> Animation routine:
+<Xian> 
+<Xian> Basically, it moves their X by .25 4 times until they've moved one space, pausing the routine for .2 seconds at everyy one of the 4 steps.
+<Xian> 
+<Xian> Hmm....okay, I see where you're coming from...
+<Xian> 
+<Xian> But wouldn't the loop version I'm using work if I put the animation routine (4 .25 steps one) in the class module with the functimeout so that it has multiple instances and can be called?
+<Xian> 
+<Xian> Yeah...
+<Xian> 
+<Xian> But only for DirectX.
+<Xian> 
+<Ðæmíòµ§> just say waht you do...ok this is what you need... you need a variable to see where they are moving to and you need a variable to see where they were before they started moving. you need an update procedure that adds .25 once to all the moving players... then it does it again until there were they are supposed to...thats what you have to do to put it simply and crude.  are you already using classes? good for you, i'm too lazy... hehe i shoudl i think i will once i get a working mape but besides... say this is what happens:
+<Ðæmíòµ§> Move Player1
+<Ðæmíòµ§> Move Player2 
+<Ðæmíòµ§> Move Player3
+<Ðæmíòµ§> 
+<Ðæmíòµ§> when they "Move" it goes all the way to their dest like you said.
+<Ðæmíòµ§> but it would have to wait for PLayer1 to finish moving  before it can call move player2
+<Xian> Yeah, but if I have the animation routines in the class, it should work anyway, right?
+<Xian> 
+<Xian> Ohh....the control of the proggy...I see.
+<Xian> 
+<Ðæmíòµ§> that is the essential problem...no, it doesnt matter where the move routine is...its that you cant have it called in a linear fashion...if you have like a timer that goes really really fast and say you have an array of players, and it does this (it might work):
+<Ðæmíòµ§> 
+<Ðæmíòµ§> For i = 0 to ubound(PLayers)
+<Xian> He he he... =)
+<Xian> 
+<Ðæmíòµ§> if players(i).moving <> true then move(player): exit for--hmm wait im thinking this out...
+<Xian> Yah....that makes sense.
+<Xian> 
+<Xian> Hmm....me either. This is very peculiar...
+<Xian> 
+<Xian> =D
+<Xian> 
+<Ðæmíòµ§> well you need a timer to see who needs to be moved, and then it somehow gets that move proc called and the timer exits... Oh! you can have to timers (this is getting silly) have a .needtobemoved variable and in the one timer it will set it to need to be moved, and in the other it will call....ugh i still can't think of a way for this to work right....nah it wont you have to only have it call one movement and exit the sub then look for the next one... i don;t know if you can do that... thats  why i just used the partial update movemnet engine hehe... (PUME) hehe... having an acronym for an engine is cool... it would work like this:
+<Ðæmíòµ§> for i = 0 to numplayer
+<Xian> Well, maybe I can find a way to return control of the program back to the loop temporarily while the previous player animates. Otherwise I'll have to redo the whole stupid thing so all the players animate at once. =P
+<Xian> 
+<Ðæmíòµ§> player(i).x = player(i).x + .25(tilesize)
+<Ðæmíòµ§> next i
+<Xian> Yeah.
+<Xian> 
+<Xian> Hmm....okie dokie. Thanks for your help!
+<Xian> 
+<Ðæmíòµ§> of course you have to fixe it for different directions and stuff...it wasnt' too hard for me.. np
+--------------------------------------

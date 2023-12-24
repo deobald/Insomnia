@@ -1,0 +1,67 @@
+Triton:
+i have an idea.. what if you read the bitmap into an array of bytes, then say, write them into another array backwards, and then save that as a file.. the only problem is it would take a long time to unscramble them when you needed them..
+
+
+Timbo:
+As for encrypting a bitmap...
+You could run it through an XOR filter. Open the file in binary mode, read each byte and XOR it with a secret number and save it to another file. The file will be complete gibberish until you run it through the XOR filter using the same number. There are countless variations on this scheme.
+
+The pseudocode would look like this:
+  Open bmpFile
+  Open EncryptFile
+  Do While Not EOF(bmpFile)
+    Read #bmpFile,,NextByte
+    NextByte = NextByte XOR SecretNumber
+    Put #EncryptFile,,NextByte
+  Loop
+  Close #bmpFile, #EncryptFile
+
+Zer:
+It's slow, but here yer go
+Open a file and make a temp file to save it to
+for every byte to encrypt go blah$=chr$((asc(blah)+1 Mod) 255)
+and to decrypt subtract 1 from the asc value and change all -1s to 255
+simple but it kinda works hehe
+
+Notes:
+Have a program for encypting. Then in the client: Decrypt, read into DCs, and Encrypt again.
+
+
+
+[Encryptor]
+
+Sub EncryptImage(ImageFile)
+  Dim NextByte
+
+  Open ImageFile For Binary As #1
+  Open Encrypt.bmp For Binary As #2
+
+  Do While Not EOF(#1)
+    Get #1, ,NextByte
+    NextByte = NextByte XOR SecretNumber
+    Put #2, ,NextByte
+  Loop
+
+  Close #1, #2
+End Sub
+
+[Client]
+
+Sub DecryptImage(ImageFile)
+  Dim NextByte
+
+  Open ImageFile For Binary As #1
+  Open Bitmap.bmp For Binary As #2
+
+  Do While Not EOF(#1)
+    Get #1, ,NextByte
+    NextByte = NextByte XOR SecretNumber
+    Put #2, ,NextByte
+  Loop
+
+  Close #1, #2
+End Sub
+
+
+
+
