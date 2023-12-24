@@ -5,8 +5,15 @@ A graphical MUD I wrote in 1996
 It might be possible to get this running on Windows, but I'm not confident.
 Doing so might require force-feeding Windows 10/11 the old VB5 runtime and OCX files?
 The following instructions are for Linux/Ubuntu.
+Unfortunately, MacOS 10.15+ no longer supports 32-bit programs, which means wine can't run Win32 apps on MacOS 11.x.
 
 ## Required: Wine
+
+```
+sudo apt install wine
+```
+
+## Required: Winetricks
 
 TODO: I installed a pile of things by hand, in addition to this... need to repeat.
 
